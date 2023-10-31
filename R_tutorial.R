@@ -25,7 +25,7 @@ summm(df, vec = df$treatment, td = 'tot_bf', tot = 'total')
 tab_mortality <- summm(df, vec = df$treatment, td = 'tot_dead', tot = 'total', table = 1)
 tab_bf <- summm(df, vec = df$treatment, td = 'tot_bf', tot = 'total', table = 1)
 
-#And the same, this time stratifying by ITN, instead of trial arm
+#And do the same, this time stratifying by ITN, instead of trial arm
 tab_mortality_ITN <- summm(df, vec = df$ITN, td = 'tot_dead', tot = 'total', table = 1)
 tab_bf_ITN <- summm(df, vec = df$ITN, td = 'tot_bf', tot = 'total', table = 1)
 
@@ -68,7 +68,7 @@ non_inf_margin1 <- ((FIC_mortality1 - 0.07) / (1- (FIC_mortality1 - 0.07))) / (F
 NI_1 <- plot_NI_OR(OR = OR1, ORl = OR1_lower, ORu = OR1_upper, mortality = 1,
            NIM = non_inf_margin1, precision = 3, title = 'Candidate vs. Active Comparator (unwashed)')
 
-#Now prepare a plot of the estiamted mortalities (not required for the non-inferiority assessment)
+#Now prepare a plot of the estimated mortalities (not required for the non-inferiority assessment)
 mFE(model = fit1, vec = df$treatment, intercept = 'Active_comparator_unwashed', bfi = 0, name = 'treatment')
 ofs1 <- new_median_FE(model = fit1, FE = c('hut','sleeper','day'))
 mk1 <- mFE(model = fit1, vec = df$treatment, intercept = 'Active_comparator_unwashed', bfi = 0, 
@@ -110,6 +110,14 @@ if(coef(summary(fit1a))['treatmentCandidate_unwashed',"Pr(>|z|)"] < 0.05 &
 }else{
   print('Candidate NOT superior to standard comparator (mosquito mortality, unwashed nets)')
 }
+
+# For the non-inferiority plot, we will now show an alternative way of presenting
+# the same information. This uses the function 'variable_NIM', which 
+# highlights the fact that the non-inferiority margin is variable 
+# (i.e. it depends on the performance of the first-in-class product)
+variable_NIM(OR = OR1, ORl = OR1_lower, ORu = OR1_upper, 
+             FIC = FIC_mortality1, mortality = 1, ymin = 0.2, ymax = 0.5)
+ggsave('variable_NIM1.pdf', width = 6, height = 5)
 
 #########################################################################
 ######         2. Mosquito mortality (washed ITNS)                 ######
@@ -309,6 +317,13 @@ if(coef(summary(fit4a))['treatmentCandidate_unwashed',"Pr(>|z|)"] < 0.05 &
 }else{
   print('Candidate NOT superior to standard comparator (blood feeding, unwashed nets)')
 }
+
+# For the non-inferiority plot, we will now show an alternative way of presenting
+# the same information. This uses the function 'variable_NIM', which 
+# highlights the fact that the non-inferiority margin is variable 
+# (i.e. it depends on the performance of the first-in-class product)
+variable_NIM(OR = OR4, ORl = OR4_lower, ORu = OR4_upper, 
+             FIC = FIC_bf4, mortality = 0, ymin = 0.09, ymax = 0.5, xmax = 2)
 
 #########################################################################
 ######              5. Blood Feeding (washed ITNS)                 ######

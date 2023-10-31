@@ -151,6 +151,58 @@ plot_NI_OR <- function(OR, ORl, ORu, mortality = 1, NIM = 0.7, precision = 2,
   return(pl + ggtitle(title2))
 }
 
+variable_NIM <- function(pc_diff = 0.07, mortality = 1, OR, ORl, ORu,
+                         FIC, ymin = 0.3, ymax = 0.7, xmin = 0.0, xmax = 1.5){
+  if(mortality==1){
+    xx <- seq(pc_diff,0.99,0.01)
+    
+    or <- rep(0,length(xx))
+    for(i in 1:length(xx)){
+      or[i] <- ((xx[i]-pc_diff)/(1-xx[i] + pc_diff))/((xx[i])/(1-xx[i]))
+    }
+    df <- data.frame('mortality' = xx, 'NIM' = or)
+    
+    ggplot() + geom_path(data = df, aes(y = mortality, x = or)) + theme_classic() + 
+      geom_point(aes(y = FIC, x=OR), size = 2.3) + 
+      geom_line(aes(y = c(FIC,FIC), x = c(ORl,ORu))) + 
+      xlab('Odds Ratio') + ylab('Mortality of the active comparator') + 
+      geom_ribbon(data = df, aes(y = mortality, xmin = 0.02, xmax = or), fill="red3", alpha=0.35) + 
+      geom_ribbon(data = df, aes(y = mortality, xmin = or, xmax = xmax), fill="green4", alpha=0.35) + 
+      geom_vline(xintercept = 1, color = 'grey66', linetype = 'dashed') + 
+      annotate('text', x = 1.01, y = ymin + 0.8*(ymax-ymin), label = 'Favours candidate >>>',#bquote('Favours candidate'~'\u2192'),
+               alpha = 1, hjust = 0) +
+      #annotate('text', x = df$NIM[5] + 0.05, y = df$mortality[5], 
+      #         label = 'Non-inferiority margin',angle = 0, hjust = 0) + 
+      scale_y_continuous(#breaks = c(0.4,0.5,0.6), 
+        limits = c(ymin,ymax)) + 
+      scale_x_continuous(breaks = c(0.25,0.5,0.75,1,1.25), limits = c(xmin,xmax)) + 
+      annotate('text', x = 0.765, y = ymin + 0.05, label = 'N.I.M.',angle = 0)
+  }else{
+    xx <- seq(0.05,0.99 - pc_diff - 0.01,0.01)
+    
+    or <- rep(0,length(xx))
+    for(i in 1:length(xx)){
+      or[i] <- ((xx[i] + pc_diff)/(1 - xx[i] - pc_diff))/((xx[i])/(1-xx[i]))
+    }
+    df <- data.frame('bf' = xx, 'NIM' = or)
+    ggplot() + geom_path(data = df, aes(y = bf, x = or)) + theme_classic() + 
+      geom_point(aes(y = FIC, x=OR), size = 2.3) + 
+      geom_line(aes(y = c(FIC,FIC), x = c(ORl,ORu))) + 
+      xlab('Odds Ratio') + ylab('Blood-feeding proportion for the active comparator') + 
+      geom_ribbon(data = df, aes(y = bf, xmin = 0.02, xmax = or), fill="green4", alpha=0.35) + 
+      geom_ribbon(data = df, aes(y = bf, xmin = or, xmax = xmax), fill="red3", alpha=0.35) + 
+      geom_vline(xintercept = 1, color = 'grey66', linetype = 'dashed') + 
+      annotate('text', x = 1.01, y = ymin + 0.8*(ymax-ymin), label = '<<< Favours candidate',#bquote('Favours candidate'~'\u2192'),
+               alpha = 1, hjust = 1) +
+      #annotate('text', x = df$NIM[5] + 0.05, y = df$bf[5], 
+      #         label = 'Non-inferiority margin',angle = 0, hjust = 0) + 
+      scale_y_continuous(#breaks = c(0.4,0.5,0.6), 
+        limits = c(ymin,ymax)) + 
+      scale_x_continuous(breaks = c(0.25,0.5,0.75,1,1.25), limits = c(xmin,xmax)) + 
+      annotate('text', x = 1.45, y = ymin + 0.05, label = 'N.I.M.',angle = 0)
+  }
+}
+
 new_median_FE <- function(model, FE = c('hut','sleeper','day')){
   l <- length(FE)
   ofs <- 0

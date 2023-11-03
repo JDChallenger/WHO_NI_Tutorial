@@ -5,7 +5,7 @@ DATE: AUGUST 2023
 * Change working directory if needed
 *e.g. 
 *cd C:\Users\username\Documents
-cd C:\Users\jchallen\Dropbox\WHO_NI_tutorial
+
 import delimited "example_dataset.csv"
 
 tab tot_dead
@@ -314,3 +314,56 @@ list if itn=="Active_comparator" & missing(day)
 /* D. Now check whether the candidate net is superior to the
 standard comparator (level 4 of 'itn2').  */
 blogit tot_bf total ib4.itn2 i.hut i.sleeper i.day i.wash
+
+/* E. The code in this section shows how to visualise the non-inferiority
+assessment in STATA, in a similar way to that shown in the R tutorial. 
+Thanks to John Bradley for his assistance with this */
+
+clear
+set scheme s1color
+
+*plot showing NI margins
+set obs 800
+gen mm = (_n/10) + 19.9 
+gen NI = ((mm-7)/(107-mm)) / (mm/(100-mm))  
+
+twoway (area mm NI, color(red*0.4)), ///
+ytitle("Mortality for active comparator (%)") xtitle("Odds ratio") /// 
+ylabel(20(10)100, angle(horizontal)) xlabel(0.1(.1)2.0) ///
+plotregion(m(b=0 l=0 r=0 t=0) )  plotregion(color(green*0.4)) ///
+xline(1, lpatter(dash) lcolor(red*0.6))
+
+*with exmaple OR and CI plotted
+gen OR = 0.95 
+gen OR_lb = 0.8
+gen OR_ub = 1.13
+gen cont_mort = 60 
+
+twoway (area mm NI, color(red*0.4)) ///
+(scatter cont_mort OR, color(black)) ///
+(rcap OR_ub OR_lb cont_mort , horizontal color(black)), ///
+ytitle("Mortality for active comparator (%)") xtitle("Odds ratio") /// 
+ylabel(20(10)100, angle(horizontal)) xlabel(0.1(.1)2.0) ///
+plotregion(m(b=0 l=0 r=0 t=0) )  plotregion(color(green*0.4)) ///
+legend(off) xline(1, lpatter(dash) lcolor(red*0.6))
+
+
+*plotting on a reasonable scale for this OR - this takes a little playing around with to get right...
+replace NI = 0.5 if mm > 79.99 & mm < 80.01
+set obs 801
+replace mm = 79.999 in 801
+replace NI = ((79.999-7)/(107-79.999)) / (79.999/(100-79.999)) in 801
+sort mm
+twoway (area mm NI, color(red*0.4)) ///
+(scatter cont_mort OR, color(black)) ///
+(rcap OR_ub OR_lb cont_mort , horizontal color(black)) ///
+if mm <= 80 & mm >= 30, ///
+ytitle("Mortality for active comparator (%)") xtitle("Odds ratio") /// 
+ylabel(30(10)80, angle(horizontal)) xlabel(0.5(.1)1.3) ///
+plotregion(m(b=0 l=0 r=0 t=0) )  plotregion(color(green*0.4)) ///
+legend(off) xline(1, lpatter(dash) lcolor(red*0.6))
+
+
+
+
+

@@ -75,7 +75,8 @@ hist(rnbinom(1000, mu = meanMos, size = dispMos))
 #adjusted for day/hut/sleeper. From datasets of past EHTs, the value of varO can
 #be seen to vary widely (see Supplementary Table 1 of this paper:
 # https://doi.org/10.1016/j.crpvbd.2023.100115)
-# The default value of 0.9 is a reasonable value to use, if you're unsure.
+# The default value of 0.9 (this is the variance of the random effect) is 
+# a reasonable value to use, if you're unsure.
 
 #Before calculating power, let's simulate 1 trial, to check everything looks OK
 xc <- simulate_trial_ITN(n_arms = 6, npw = 6, 

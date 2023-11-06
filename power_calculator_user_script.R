@@ -63,8 +63,19 @@ blood_feeding <- c(0.50, 0.30, 0.30, 0.25, 0.30, 0.30, 0.25)
 #Should the mosquito counts be a constant value ('deterministic', det=1), or be sampled from a
 #negative binomial distn (det=0) with the given mean and
 #dispersion parameter (dispMos) ?
+#If you are drawing from a negative-binomial distribution, this code can
+#help you visualise the distribution's shape:
+meanMos <- 10
+dispMos <- 1
+hist(rnbinom(1000, mu = meanMos, size = dispMos))
 
-#random effect(s). Variance of the observation-level random effect (varO)
+#Variability present in the assay..Here this is described by a single 
+#observation-level random effect (varO), that represents overdispersion.
+#This is for simplicity: when calculating power, the regression model will be 
+#adjusted for day/hut/sleeper. From datasets of past EHTs, the value of varO can
+#be seen to vary widely (see Supplementary Table 1 of this paper:
+# https://doi.org/10.1016/j.crpvbd.2023.100115)
+# The default value of 0.9 is a reasonable value to use, if you're unsure.
 
 #Before calculating power, let's simulate 1 trial, to check everything looks OK
 xc <- simulate_trial_ITN(n_arms = 6, npw = 6, 
@@ -128,7 +139,7 @@ detectCores()
 
 t1 <- Sys.time()
 power_calculator_ITN(parallelise = 0, trial = 3, npw = 6, rotations = 1, 
-     nsim = 1000, n_arms = 7, mos_det = 1, meanMos = 7, varO = .5, 
+     nsim = 1000, n_arms = 7, mos_det = 1, meanMos = 7, varO = .9, 
      dispMos = .6, aoi = c(4,6), responses = c(0.5,0.5,0.5,0.5,0.5,0.5,0.5))
 t2 <- Sys.time()
 t2 - t1

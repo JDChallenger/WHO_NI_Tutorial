@@ -44,9 +44,7 @@ summm <- function(data, vec, td = 'tot_dead', tot = 'total', table = 0, precisio
     return(dh)
   }
 
-  
 }
-
 
 ##mortality summary for FE-only models
 mFE <- function(model, vec, intercept, bfi = 0, name = "treatment", offset = 0, precision = 3){

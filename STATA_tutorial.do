@@ -315,7 +315,87 @@ list if itn=="Active_comparator" & missing(day)
 standard comparator (level 4 of 'itn2').  */
 blogit tot_bf total ib4.itn2 i.hut i.sleeper i.day i.wash
 
-/* E. The code in this section shows how to visualise the non-inferiority
+/* ############################################################## 
+							IRS Example     
+############################################################## */
+
+
+/* As the procedure for IRS is extremely similar to that carried out for ITNs,
+We won't repeat all the details here. But we will show a quick example. 
+Using the dataset loaded below, we'll test whether a candidate IRS product is 
+non-inferior to an active comparator IRS product, in terms of mosquito mortality.
+Here, we'll compare how the products performed when sprayed on a mud wall. 
+In the dataset, products were assessed on both mud and concrete. An untreated
+was also included */
+
+clear
+import delimited "example_dataset_IRS.csv"
+
+tab tot_dead
+summarize tot_dead
+levelsof(hut)
+levelsof(sleeper)
+levelsof(treatment)
+
+/* Determine the non-inferiority margin (NIM)
+NIM: mosquito mortality induced by the candidate product should be no more than 7% less
+ than that induced by the active comparator product.
+First, calculate the (unadjusted) mosquito mortality in each trial arm */
+collapse (sum) sum1=tot_dead sum2=total, by(treatment)
+gen prop_dead = sum1/sum2
+list
+gen or1 = (prop_dead - 0.07)/(1-prop_dead + 0.07)
+gen or2 = (prop_dead)/(1-prop_dead)
+*Calculate the odds-ratio (OR) for the NIM
+gen nim = or1/or2
+list
+save "aggregated_mortality_IRS.dta"
+
+/* ############################################################## 
+		Mosquito Mortality (products applied on mud walls)   
+ ############################################################## */
+
+/* A. Reload dataset to carry out the regression*/
+clear
+import delimited "example_dataset_IRS.csv"
+append using "aggregated_mortality_IRS.dta"
+*Remove variables we don't need anymore
+drop sum1 sum2 prop_dead or1 or2
+
+/* B. At the moment, 'treatment' is a string variable. We need a 
+factor variable for the regression model */
+encode(treatment), generate(treatment2)
+replace treatment2=. if day==.
+levelsof(treatment2)
+*See how the treatment2 levels correspond to treatment*
+label list treatment2
+
+/* C. For the regression model we use the function 'blogit', 
+which fits a logistic regression model to aggregated data.
+As treatments are not rotated around huts, 
+the variable 'hut' is less informative here.
+We want the 2nd level of treatment2 as baseline (active comparator on mud) */
+blogit tot_dead total ib2.treatment2 i.sleeper i.day
+
+*Here is how the model is stored in Stata's memory*
+ereturn list
+
+*Calculate the odds ratio (OR) and 95% CI for the unwashed candidate product
+gen or_model = exp(_b[_outcome:4.treatment2])
+gen or_model_lower = exp(_b[_outcome:4.treatment2] - 1.96* _se[_outcome:4.treatment2])
+gen or_model_upper = exp(_b[_outcome:4.treatment2] + 1.96* _se[_outcome:4.treatment2])
+
+*Alternatively, we could have asked Stata to calculate the ORs for us, like this:*
+blogit tot_dead total ib2.treatment2 i.sleeper i.day, or
+
+*Recall the non-inferiority margin. Use this to compare with the OR calculated above
+list if treatment=="Active_comp_mud" & missing(day)
+
+
+/* End of IRS example*/
+
+
+/* The code in this section shows how to visualise the non-inferiority
 assessment in STATA, in a similar way to that shown in the R tutorial. 
 Thanks to John Bradley for his assistance with this */
 

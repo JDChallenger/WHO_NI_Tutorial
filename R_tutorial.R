@@ -37,7 +37,7 @@ df$treatment <- as.factor(df$treatment)
 df$ITN <- as.factor(df$ITN)
 
 #########################################################################
-#####          1. Mosquito mortality (unwashed ITNS)                #####
+#####          1. Mosquito mortality (unwashed ITNs)                #####
 #########################################################################
 
 #Change baseline treatment category
@@ -120,7 +120,7 @@ variable_NIM(OR = OR1, ORl = OR1_lower, ORu = OR1_upper,
 ggsave('variable_NIM1.pdf', width = 6, height = 5)
 
 #########################################################################
-######         2. Mosquito mortality (washed ITNS)                 ######
+######         2. Mosquito mortality (washed ITNs)                 ######
 #########################################################################
 #Change baseline treatment category
 df$treatment <- relevel(df$treatment, 'Active_comparator_washed') 
@@ -246,7 +246,7 @@ if(coef(summary(fit3a))['ITNCandidate',"Pr(>|z|)"] < 0.05 &
 }
 
 #########################################################################
-######            4. Blood Feeding (unwashed ITNS)                 ######
+######            4. Blood Feeding (unwashed ITNs)                 ######
 #########################################################################
 #Change baseline treatment category
 df$treatment <- relevel(df$treatment, 'Active_comparator_unwashed') 
@@ -326,7 +326,7 @@ variable_NIM(OR = OR4, ORl = OR4_lower, ORu = OR4_upper,
              FIC = FIC_bf4, mortality = 0, ymin = 0.09, ymax = 0.5, xmax = 2)
 
 #########################################################################
-######              5. Blood Feeding (washed ITNS)                 ######
+######              5. Blood Feeding (washed ITNs)                 ######
 #########################################################################
 df$treatment <- relevel(df$treatment, 'Active_comparator_washed') 
 levels(df$treatment)
@@ -450,4 +450,93 @@ if(coef(summary(fit6a))['ITNCandidate',"Pr(>|z|)"] < 0.05 &
 }else{
   print('Candidate NOT superior to standard comparator (blood feeding, combined analysis)')
 }
+
+#######################################################
+# The procedure for IRS is extremely similar, so we won't go 
+# through in as much detail. But we will show a quick example
+
+#########################################################################
+######             IRS - Mosquito mortality (mud)                  ######
+#########################################################################
+
+df_IRS <- read.csv("example_dataset_IRS.csv")
+str(df_IRS)
+head(df_IRS)
+
+table(df_IRS$treatment) #IRS sprayed on mud & cement
+table(df_IRS$hut) #9 huts. 1 hut for the untreated control, 2 huts usedfor each of the other arms
+table(df_IRS$sleeper)
+table(df_IRS$day) #trial runs for about 3 months
+
+#As before, we calculate the (unadjusted) mortalities 
+#in each trial arm
+summm(df_IRS, vec = df_IRS$treatment, td = 'tot_dead', tot = 'total')
+
+#Let's save these:
+IRS_mortality <- summm(df_IRS, vec = df_IRS$treatment, td = 'tot_dead',
+                       tot = 'total', table = 1)
+
+#These variables should be factor variables in R
+df_IRS$hut <- as.factor(df_IRS$hut)
+df_IRS$sleeper <- as.factor(df_IRS$sleeper)
+df_IRS$day <- as.factor(df_IRS$day)
+df_IRS$treatment <- as.factor(df_IRS$treatment)
+df_IRS$IRS <- as.factor(df_IRS$IRS)
+
+levels(df_IRS$treatment)
+#Change baseline treatment category
+df_IRS$treatment <- relevel(df_IRS$treatment, 'Active_comp_mud') 
+levels(df_IRS$treatment)
+
+#As treatments are not rotated around huts, this variable is less informative here
+fit_IRS_mud <- 
+  glm(
+    cbind(tot_dead, total - tot_dead) ~
+      treatment + sleeper + day, # + hut
+    family = binomial, data = df_IRS)
+summary(fit_IRS_mud)
+
+OR_mud <- exp(coef(summary(fit_IRS_mud))['treatmentCandidate_mud',"Estimate"])
+OR_mud_lower <- exp(coef(summary(fit_IRS_mud))['treatmentCandidate_mud',"Estimate"] - 
+                   1.96*coef(summary(fit_IRS_mud))['treatmentCandidate_mud','Std. Error'])
+OR_mud_upper <- exp(coef(summary(fit_IRS_mud))['treatmentCandidate_mud',"Estimate"] + 
+                   1.96*coef(summary(fit_IRS_mud))['treatmentCandidate_mud','Std. Error'])
+
+#### What should the non-inferiority margin be???
+#First work out the FIC mortality- we'll use the value 
+#taken directly from the data for this
+
+#First convert percentage into a proportion
+FIC_mortality_IRS_mud <- IRS_mortality[IRS_mortality$Arm=='Active_comp_mud',]$Percentage / 100
+non_inf_margin_IRS_mud <- ((FIC_mortality_IRS_mud - 0.07) / (1- (FIC_mortality_IRS_mud - 0.07))) / (FIC_mortality_IRS_mud / (1- FIC_mortality_IRS_mud)) 
+
+NI_IRS_mud <- plot_NI_OR(OR = OR_mud, ORl = OR_mud_lower, ORu = OR_mud_upper, mortality = 1,
+                   NIM = non_inf_margin_IRS_mud, precision = 3, title = 'Candidate vs. Active Comparator (mud)')
+
+#Now prepare a plot of the estimated mortalities (not required for the non-inferiority assessment)
+mFE(model = fit_IRS_mud, vec = df_IRS$treatment, intercept = 'Active_comp_mud', bfi = 0, name = 'treatment')
+ofs_IRS_mud <- new_median_FE(model = fit_IRS_mud, FE = c('sleeper','day'))
+mk_IRS_mud <- mFE(model = fit_IRS_mud, vec = df_IRS$treatment, intercept = 'Active_comp_mud', bfi = 0, 
+           name = "treatment", offset = ofs_IRS_mud)
+summm(df_IRS, vec = df_IRS$treatment, td = 'tot_dead', tot = 'total')
+#you could drop the cement arms before plotting if desired.
+#We'll leave them here for now
+mk_IRS_mud$ord <- c(1,2,3,4,5) 
+
+p_IRS_mud <- ggplot(data = mk_IRS_mud) + 
+  geom_errorbarh(aes(y = ord, xmin = Lower_95pc_CI, xmax = Upper_95pc_CI), height = 0) + 
+  geom_point(aes(y=ord, x=Mortality, colour = factor(ord)), size = 3) +
+  xlim(c(0,1)) + xlab('Proportion of mosquitoes killed') +
+  theme_classic() + ylab('') + theme(axis.line.y = element_blank(),
+                                     axis.ticks.y = element_blank(), axis.text.y = element_blank()) +
+  scale_color_discrete(labels = c('Control',
+                                  'Active comparator (mud)',
+              'Active comparator (cement)', 
+              'Candidate (mud)', 'Candidate (cement)'
+              )) +
+  theme(legend.position = c(0.8,0.3)) + labs(color = '') + # add washed status to labs??
+  ggtitle('Mosquito mortality (IRS)')
+p_IRS_mud
+cowplot::plot_grid(p_IRS_mud,NI_IRS_mud, nrow = 1, rel_widths = c(0.6,0.4), labels = c('A','B'))
+ggsave('Assessment_IRS_mud.pdf', height = 5.7, width = 9.7)
 

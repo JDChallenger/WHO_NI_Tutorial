@@ -1,29 +1,7 @@
 library(ggplot2)
 library(rethinking)
 
-## assume constant loss of nets over time (exponential decay)
-## Here, 'pc_loss' is the percentage of nets lost by the end of the follow up period
-## 'duration' determines the follow-up period (in years)
-## This function returns the the 'loss rate': this enables us to estimate the
-## percentage of nets remaining at intermediate time points
-calculate_r <- function(pc_loss, duration = 3){
-  duration/(log(100) - log(100 - pc_loss))
-}
 
-#so, if 20% of ITNs are lost over three years...
-rc <- calculate_r(pc_loss = 20, duration = 3)
-
-#... we can estimate net loss as a continuous function of time
-ggplot() + geom_function(fun = function(x) exp(-x/rc)) + theme_classic() + 
-  xlim(c(0,4)) + geom_vline(xintercept = 3, color = 'orange2') + 
-  geom_hline(yintercept = 0.8, color = 'orange2') + 
-  geom_vline(xintercept = c(0.5,1,2), alpha = .3, color = 'cyan')
-
-#so how many nets would one expect to be remaining after 6/12/24 months?
-#(Here we write this as 0.5/1/2 years)
-exp(-0.5/rc)
-exp(-1/rc)
-exp(-2/rc)
 
 #update df name
 # Let's load some hypothetical field data 
@@ -128,8 +106,166 @@ annotate('text', label = expression(paste('Measurement of ',t[50],' =')), x = 3.
 MSF_plot 
 
 
-
 ################################################################################
 ###### Simualation procedure, to estimate precision of the t_50 estimate #######
 ################################################################################
+
+# For this procedure, we are not starting with a dataset. This means we need to think about
+# how nets are lost to follow up over time
+
+## We assume constant loss of nets over time (exponential decay)
+## Here, 'pc_loss' is the percentage of nets lost by the end of the follow up period
+## 'duration' determines the follow-up period (in years)
+## This function returns the the 'loss rate': this enables us to estimate the
+## percentage of nets remaining at intermediate time points
+calculate_r <- function(pc_loss, duration = 3){
+  duration/(log(100) - log(100 - pc_loss))
+}
+
+#so, if 20% of ITNs are lost over three years...
+rc <- calculate_r(pc_loss = 20, duration = 3)
+
+#... we can estimate net loss as a continuous function of time
+ggplot() + geom_function(fun = function(x) exp(-x/rc)) + theme_classic() + 
+  xlim(c(0,4)) + geom_vline(xintercept = 3, color = 'orange2') + 
+  geom_hline(yintercept = 0.8, color = 'orange2') + 
+  geom_vline(xintercept = c(0.5,1,2), alpha = .3, color = 'cyan')
+
+#so how many nets would one expect to be remaining after 6/12/24 months?
+#(Here we write this as 0.5/1/2 years)
+exp(-0.5/rc)
+exp(-1/rc)
+exp(-2/rc)
+
+#This function 'loss_sim' will do the following tasks: 
+# 1) for a given value of loss rate over 3 years ('loss_rate'), it will estimate
+#  the number of nets lost at earlier time points (0.5,1,2 years);
+# 2) For a user-chosen choice of the true values of the proportion of nets remaining
+#  in use at each point, binomial sampling is used to generate a synthetic dataset
+#  from a community study
+# 3) The Bayesian model is fitted, to estimate L (and thus t_{50}) 
+
+loss_sim <- function(start_samp = 100, loss_rate = 10, verbose = F,
+                     surv_prob = c(0.88,.63,.48,.27), full_model = F){
+  rc <- calculate_r(pc_loss = loss_rate, duration = 3)
+  
+  #so how many nets would one expect to be remaining after 6/12/24 mths?
+  bray <- round(start_samp*c(exp(-0.5/rc), exp(-1/rc), exp(-2/rc), exp(-3/rc)))
+  dxh <- data.frame('t' = c(0.5,1,2,3), 'N' = bray)
+  
+  dxh$surv <- rbinom(4,dxh$N, surv_prob)
+  
+  if(verbose == T){
+    print(dxh)
+  }
+  
+  if(full_model == T){
+    m2 <- ulam(
+      alist(
+        surv ~ dbinom(N, p),
+        p <- exp(20 - 20/(1 - (t/L)*(t/L))),
+        L ~ dunif(5.5,20.7)
+      ),
+      data = dxh, chains = 3, cores = 3, iter = 4000
+    )
+  }else{
+    m2 <- quap(
+      alist(
+        surv ~ dbinom(N, p),
+        p <- exp(20 - 20/(1 - (t/L)*(t/L))),
+        L ~ dunif(5.5,20.7)
+      ),
+      data = dxh#, chains = 3, cores = 3, iter = 4000
+    )
+  }
+  
+  if(verbose == T){
+    print(precis(m2))    
+  }
+  
+  es2 <- extract.samples(m2)
+  store <- rep(0,5000)
+  for(i in 1:5000){
+    store[i] <- es2$L[i]*sqrt(log(2)/(log(2) + 20))
+  }
+  
+  return(c(mean(store),
+           quantile(store, probs = c(0.025))[[1]],quantile(store, probs = c(0.5))[[1]],
+           quantile(store, probs = c(0.975))[[1]],
+           quantile(store, probs = c(0.975))[[1]] - quantile(store, probs = c(0.025))[[1]],
+           start_samp, loss_rate))
+}
+
+loss_sim(full_model = F, verbose = T, start_samp = 100, loss_rate = 20)
+
+loss_vec <- seq(5,30,5)
+samp_vec <- seq(30,120,10)
+storeM <- matrix(0,nrow = length(samp_vec)*length(loss_vec), ncol = 7)
+count <- 1
+for(i in 1:length(samp_vec)){
+  for(j in 1:length(loss_vec)){
+    storeM[count,] <- loss_sim(start_samp = samp_vec[i], loss_rate = loss_vec[j],
+                               full_model = F)
+    print(paste0('count equals: ',count))
+    count <- count + 1
+  }
+}
+storeMDF <- as.data.frame(storeM)
+colnames(storeMDF) <- c('mean','cr1','med','cr2','prec', 'sample','loss')
+
+ggplot(storeMDF) + geom_point(aes(x = sample, y = prec, color = factor(loss))) + 
+  facet_wrap(~loss) + theme_classic()
+
+#this can be quite noisy, largely due to the binomial sampling.
+# If we wish, we could average over this, by repeating the process (say, 50 times),
+# for each combination of parameter values
+
+loss_vec <- seq(5,20,5)
+samp_vec <- seq(100,300,50)
+storeM2 <- matrix(0,nrow = length(samp_vec)*length(loss_vec)*50, ncol = 7)
+count <- 1
+for(i in 1:length(samp_vec)){
+  for(j in 1:length(loss_vec)){
+    for(k in 1:50){
+      storeM2[count,] <- loss_sim(start_samp = samp_vec[i], 
+                                  loss_rate = loss_vec[j], full_model = F)
+      print(paste0('count equals: ',count))
+      count <- count + 1
+    }
+  }
+}
+storeM2DF <- as.data.frame(storeM2)
+colnames(storeM2DF) <- c('mean','cr1','med','cr2','prec', 'sample','loss')
+
+#Post-process the data
+strM <- matrix(0,ncol = 5, nrow = length(samp_vec)*length(loss_vec))
+count <- 1
+for(i in 1:length(samp_vec)){
+  for(j in 1:length(loss_vec)){
+    #Select all outputs for this combination of parameter values
+    aux <- storeM2DF[storeM2DF$sample==samp_vec[i] & storeM2DF$loss==loss_vec[j],]
+    aux1 <- mean(aux$prec)#mean
+    aux2 <- quantile(aux$prec, probs = c(0.025,0.975))
+    aux3 <- aux2[2] - aux2[1]
+    strM[count,] <- c(aux1, aux2[1], aux2[2], samp_vec[i], loss_vec[j])
+    count <- count + 1  
+  }
+}
+strMDF <- as.data.frame(strM)
+colnames(strMDF) <- c('mean_prec', 'ci1', 'ci2', 'sample', 'loss')
+
+ggplot(strMDF) + 
+  theme_classic() + facet_wrap(~loss) + 
+  geom_errorbar(aes(x = sample, ymin = ci1, ymax = ci2), alpha = .8, color = 'grey', width = .1) + 
+  geom_point(aes(x = sample, y = mean_prec, color = factor(loss))) + 
+  labs(color = 'Loss to\nfollow up (%)') + xlab('Starting sample size (no. of ITNs)') + 
+  ylab(expression(paste("Precision of measurement of ", t[50],' (years)',sep=""))) + 
+  ggtitle(expression(paste('Precision of ', t[50],' measurement'))) + ylim(c(0,NA)) + xlim(c(85,NA)) + 
+  theme(legend.position = 'bottom')
+
+
+
+
+
+
 

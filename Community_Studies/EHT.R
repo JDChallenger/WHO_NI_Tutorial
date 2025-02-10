@@ -43,3 +43,23 @@ OR_lower > non_inf_margin # Is the non-inferiority criterion satisfied? This sho
 ################################################################################
 ####################  Simulation-based power calculation   #####################
 ################################################################################
+
+#Here, we will use a function to simulate the synethetic datasets, and another 
+# function to carryout the non-inferiority assessment
+
+#full details of the arguments of each function
+
+n_sim <- 1000 # the number of simulations to carry out
+store_power <- rep(NA, n_sim) # a container for the outcome of each simulated study
+for(i in 1:n_sim){
+  mosdata <- EHT_sim(n_arms = 9, npr = 9, mos_det = 0,
+                     meanMos = 10, rotations = 1,
+                     mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
+                     sigma_net = 0.5)
+  store_power[i] <- EHT_NIM(dataset = mosdata, verbose = F)
+}
+
+mean(store_power)
+binom.test(table(factor(store_power,c(1,0))))$conf.int
+
+

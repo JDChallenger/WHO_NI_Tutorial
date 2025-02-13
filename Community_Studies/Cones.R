@@ -36,3 +36,16 @@ c(OR_lower, OR, OR_upper)
 
 #Here, we will use a function to simulate the synethetic datasets, and another 
 # function to carryout the non-inferiority assessment
+
+nsim <- 1000
+store_power <- rep(NA, nsim) # a container for the outcome of each simulated study
+
+for(i in 1:nsim){
+ cone_data <- cone_sim2(cone_mort = 0.4, npos = 4, rep = 4, nday = 20, verbose = F) # check the number of replicates required 
+ store_power[i] <- cone_NIM(dataset = cone_data, verbose = F)
+}
+
+#Power estimate:
+mean(store_power)
+#95% confidence intervals for power estimate
+binom.test(table(factor(store_power,c(1,0))))$conf.int

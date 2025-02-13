@@ -49,9 +49,9 @@ OR_lower > non_inf_margin # Is the non-inferiority criterion satisfied? This sho
 
 #full details of the arguments of each function
 
-n_sim <- 1000 # the number of simulations to carry out
-store_power <- rep(NA, n_sim) # a container for the outcome of each simulated study
-for(i in 1:n_sim){
+nsim <- 1000 # the number of simulations to carry out
+store_power <- rep(NA, nsim) # a container for the outcome of each simulated study
+for(i in 1:nsim){
   mosdata <- EHT_sim(n_arms = 9, npr = 9, mos_det = 0,
                      meanMos = 10, rotations = 1,
                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),

@@ -255,12 +255,13 @@ cone_sim2 <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10,
   cone_data$day <- NA
   if(nday < 1){
     lu <- unique(cone_data$llin_code)
-    for(i in 1:(lu/2)){ #number of LLINs
+    for(i in 1:(length(lu)/2)){ #number of LLINs
       #cone_data[cone_data$llin_code==paste('A',i, sep = '_'),]$day <- i 
       #cone_data[cone_data$llin_code==paste('B',i, sep = '_'),]$day <- i 
       cone_data[cone_data$llin_code==lu[2*i - 1],]$day <- i 
       cone_data[cone_data$llin_code==lu[2*i],]$day <- i 
-      pday <- 2*dim(cone_data[cone_data$llin_code==lu[2*i - 1],]$day)[1]
+      pday <- 2*dim(cone_data[cone_data$llin_code==lu[2*i - 1],])[1] # '$day taken off'
+      #print(dim(cone_data[cone_data$llin_code==lu[2*i - 1],]))
     }
     if(verbose==T){
       print(paste0('Cone tests per day: ',pday))

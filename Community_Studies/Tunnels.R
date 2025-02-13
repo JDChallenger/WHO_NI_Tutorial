@@ -1,4 +1,5 @@
 library(ggplot2)
+source('Community_Studies/useful_functions_CS.R')
 
 ################################################################################
 #########################   Analysing a dataset   ##############################

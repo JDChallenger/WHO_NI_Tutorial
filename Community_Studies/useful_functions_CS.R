@@ -323,6 +323,113 @@ cone_sim2 <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10,
     cone_data$tot_dead[i] <- aux
   }
   
-  return(cone_data) 
+  return(cone_data[, !(names(cone_data) %in% c('LO'))]) 
   
-}  
+}
+
+#Clean & annotate!!
+tunnel_sim2 <- function(mort = 0.4, #reps = 1, #need reps???
+                        npos = 3, n_nets = 30,
+                        sigma_net = 0.7, n_tunnels = 5, verbose = F, n_mosq = 50){
+  
+  #what if this isn't an integer??
+  n_day <- ceiling(2*n_nets*npos / n_tunnels) # number of arms * number of nets * number of net positions
+  if(verbose==T){
+    print(n_day)
+  }
+  
+  tunnel_data <- data.frame(expand.grid(
+    day = seq(1,n_day),
+    tunnel = seq(1,n_tunnels)#,
+  ))
+  
+  net_list <- c(paste('A',seq(1,n_nets), sep = '_'),
+                paste('B',seq(1,n_nets), sep = '_'))
+  #shuffle order
+  net_list <- sample(net_list)
+  tunnel_data$llin_code <- rep(net_list,3)#c(net_list, net_list, net_list) # repeat three times?
+  
+  pos_list <- c()
+  for(i in 1:npos){
+    pos_list <- c(pos_list,rep(i,2*n_nets))  # for two arms
+  }
+  
+  tunnel_data$net_position <- pos_list#c(rep(1,2*n_nets), rep(2,2*n_nets), rep(3,2*n_nets))
+  
+  tunnel_data$arm <- substr(tunnel_data$llin_code,1,1)
+  tunnel_data$day <- as.factor(tunnel_data$day)
+  tunnel_data$tunnel <- as.factor(tunnel_data$tunnel)
+  tunnel_data$total <- n_mosq
+  
+  lst <- unique(tunnel_data$llin_code)
+  lstA <- unique(tunnel_data$arm)
+  lstD <- unique(tunnel_data$day)
+  lstT <- unique(tunnel_data$tunnel)
+  
+  vec_arm <- qlogis(c(mort,mort))
+  vec_llin <- rnorm(2*n_nets, 0, sigma_net)
+  vec_day <- rnorm(length(unique(tunnel_data$day)),0,0.25)
+  vec_tunnel <- rnorm(length(unique(tunnel_data$tunnel)),0,0.25)
+  
+  #print(head(tunnel_data))
+  
+  ll <- dim(tunnel_data)[1]
+  #what affects mortality here? Arm & llin_code
+  tunnel_data$LO <- NA
+  for(i in 1:ll){
+    s1 <- which(lstA==tunnel_data[i,5]) # arm
+    s2 <- which(lst==tunnel_data[i,3]) #llin code
+    s3 <- which(lstD==tunnel_data[i,1]) #day
+    s4 <- which(lstT==tunnel_data[i,2]) #tunnel
+    
+    #print(c(s1,s2,s3,s4))
+    
+    bray <- vec_arm[s1] + vec_llin[s2] + vec_day[s3] + vec_tunnel[s4] #+ vec_net[s5]
+    tunnel_data$LO[i] <- bray
+    
+  }
+  
+  #simulate trial
+  tunnel_data$tot_dead <- NA
+  for(i in 1:ll){
+    aux <- rbinom(1, tunnel_data$total[i], InvLogit(tunnel_data$LO[i]))
+    tunnel_data$tot_dead[i] <- aux
+  }
+  return(tunnel_data[, !(names(tunnel_data) %in% c('LO'))])
+}
+
+tunnel_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB', verbose = T){
+  
+  FIC_mortality <- sum(dataset[dataset$arm==int_cat,]$tot_dead)/sum(dataset[dataset$arm==int_cat,]$total)
+  if(verbose == T){
+    print(FIC_mortality)
+  }
+  non_inf_margin <- ((FIC_mortality - NIM_pc) / (1- (FIC_mortality - NIM_pc))) / (FIC_mortality / (1- FIC_mortality)) 
+  if(verbose == T){
+    print(non_inf_margin)
+  }
+  
+  fit <- glm(
+    cbind(tot_dead, total - tot_dead) ~ arm + day + tunnel, #  + compartment. As arms don't move
+    family = binomial, data = dataset # looks weird?
+  )
+  summary(fit)
+  
+  OR1 <- exp(coef(summary(fit))[FE_label,"Estimate"])
+  OR1_lower <- exp(coef(summary(fit))[FE_label,"Estimate"] - 
+                     1.96*coef(summary(fit))[FE_label,'Std. Error'])
+  OR1_upper <- exp(coef(summary(fit))[FE_label,"Estimate"] + 
+                     1.96*coef(summary(fit))[FE_label,'Std. Error'])
+  
+  aux2 <- -1
+  if(OR1_lower > non_inf_margin){
+    aux2 <- 1
+  }else{
+    aux2 <- 0
+  }
+  
+  if(aux2 < 0){
+    print('Error detected')
+  }
+  return(aux2)
+}

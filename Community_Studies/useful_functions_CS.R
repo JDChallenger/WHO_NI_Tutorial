@@ -433,3 +433,168 @@ tunnel_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB'
   }
   return(aux2)
 }
+
+#change name, add more annotation. Should the number of days be left empty? For the user to define
+IACT_sim2 <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose = F,
+                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
+                      sigma_net = 0.4, n_nets = 30){
+  if(n_comp%%n_arm !=0){
+    print('Results may be unrealiable if the number of compartments is 
+         not a multiple of (or equal to) the number of trial arms')
+  } 
+  if(length(mortalities) != n_arm  ){
+    print('The number of arms (n_arm) should match the length of the mortalities vector')
+  }
+  if(n_nets < 30){
+    print('Please select at least 30 nets per arm')
+    #break?
+  }
+  
+  mosdata <-
+    expand.grid(
+      compartment = factor(1:n_comp),
+      day = 1:n_day
+    )
+  
+  aux3 <- 1:n_comp #sample(1:18) # number of sleepers must match number of compartments
+  
+  mosdata$sleeper <- NA
+  for(i in 1:n_day){
+    bm <- i%%n_comp
+    #print(bm)
+    if(bm==0){
+      #print('bray')
+      mosdata[mosdata$day==i,]$sleeper <- c(aux3[c(n_comp:n_comp)],aux3[seq_len(n_comp-1)])
+      
+    }else{
+      #print(c(aux3[c(bm:n_comp)],aux3[seq_len(n_comp-1)]))
+      mosdata[mosdata$day==i,]$sleeper <- c(aux3[c(bm:n_comp)],aux3[seq_len(bm-1)])
+    }
+    #print(i)
+  }
+  
+  aux2 <- paste('N', 1:n_arm, sep = '')
+  ratio <- round(n_comp/n_arm)
+  aux2b <- rep(aux2,ratio) # This assumes that we have twice as many compartments as arms
+  aux2d <- sample(aux2b)#aux2b[order(aux2b)]
+  
+  mosdata$net <- NA
+  for(i in 1:n_day){
+    mosdata[mosdata$day==i,]$net <- aux2d
+  }
+  
+  mosdata$netcode <- NA
+  bray <- n_day * n_comp / n_arm / n_nets # not necessarily an integer
+  #which means
+  bm <- (n_day * n_comp / n_arm ) %% n_nets
+  lu <- unique(mosdata$net)
+  if(bm==0){
+    for(i in 1:length(lu)){
+      if(verbose==T){
+        print(paste0('Each net is used ',bray,' times'))
+      }
+      
+      mosdata[mosdata$net==lu[i],]$netcode <- rep(paste0(lu[i],'_',seq(1,n_nets)),bray)  # if bray an integer!!
+    }
+  }else{
+    flr <- floor(n_day * n_comp / n_arm / n_nets)
+    rem <- (n_day * n_comp / n_arm ) %% n_nets
+    if(verbose==T){
+      print(paste0('In each arm, ',n_nets - rem,' nets are used ',flr,' times; ',rem,' are used ',flr + 1,' times.'))
+    }  
+    
+    lu <- unique(mosdata$net)
+    for(i in 1:length(lu)){
+      mosdata[mosdata$net==lu[i],]$netcode <- c(rep(paste0(lu[i],'_',seq(1,n_nets)),flr), 
+                                                paste0(lu[i],'_',seq(1,rem)))  
+    }
+  }
+  
+  #add mosquitoes
+  mosdata$total <- n_mosq
+  
+  vec_arm <- qlogis(mortalities)
+  
+  #Variability due to... sleepers? Compartments? Night? Individual net??
+  #For each data point, work out a bespoke log-odds mortality
+  
+  vec_day <- rnorm(n_day,0,0.2)
+  vec_comp <- rnorm(n_comp,0,0.2)
+  vec_sleep <- rnorm(n_comp,0,0.1)
+  vec_net <- rnorm(n_nets*n_arm,0,sigma_net) 
+  
+  ll <- dim(mosdata)[1]
+  aux4 <- unique(mosdata$netcode)
+  
+  mosdata$LO <- NA
+  for(i in 1:ll){
+    s1 <- which((1:n_comp) == mosdata[i,1]) # comp
+    s2 <- which((1:n_day) == mosdata[i,2]) #day
+    s3 <- which((1:n_comp) == mosdata[i,3]) #sleeper
+    s4 <- which(aux2 == mosdata[i,4])
+    s5 <- which(aux4 == mosdata[i,5])
+    
+    bray <- vec_comp[s1] + vec_day[s2] + vec_sleep[s3] + vec_arm[s4] + vec_net[s5]
+    mosdata$LO[i] <- bray
+  }
+  
+  #simulate trial
+  mosdata$tot_dead <- NA
+  for(i in 1:ll){
+    aux <- rbinom(1, mosdata$total[i], InvLogit(mosdata$LO[i]))
+    mosdata$tot_dead[i] <- aux
+  }
+  if(verbose==T){
+    print(paste0('Dim. of data: ',dim(mosdata)))
+  }
+  
+  return(mosdata[, !(names(mosdata) %in% c('LO'))]) 
+}  
+
+#######################################################################
+# function to do non-inf assessment
+IACT_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'N3',  FE_label = 'netN6', verbose = T){
+  
+  FIC_mortality <- sum(dataset[dataset$net==int_cat,]$tot_dead)/sum(dataset[dataset$net==int_cat,]$total)
+  if(verbose == T){
+    print(FIC_mortality)
+  }
+  non_inf_margin <- ((FIC_mortality - NIM_pc) / (1- (FIC_mortality - NIM_pc))) / (FIC_mortality / (1- FIC_mortality)) 
+  if(verbose == T){
+    print(non_inf_margin)
+  }
+  
+  dataset$sleeper <- as.factor(dataset$sleeper)
+  dataset$day <- as.factor(dataset$day)
+  dataset$net <- as.factor(dataset$net)
+  dataset$net <- relevel(dataset$net, 'N3') 
+  levels(dataset$net)
+  
+  fit <- glm(
+    cbind(tot_dead, total - tot_dead) ~ net + day + sleeper, 
+    family = binomial, data = dataset 
+  )
+  summary(fit)
+  
+  OR1 <- exp(coef(summary(fit))[FE_label,"Estimate"])
+  OR1_lower <- exp(coef(summary(fit))[FE_label,"Estimate"] - 
+                     1.96*coef(summary(fit))[FE_label,'Std. Error'])
+  OR1_upper <- exp(coef(summary(fit))[FE_label,"Estimate"] + 
+                     1.96*coef(summary(fit))[FE_label,'Std. Error'])
+  
+  aux2 <- -1
+  if(OR1_lower > non_inf_margin){
+    aux2 <- 1
+  }else{
+    aux2 <- 0
+  }
+  #if verbose is T, print OR & 95% CI?
+  if(verbose == T){
+    print(paste0(round(OR1,4),' [',round(OR1_lower,4),', ',round(OR1_upper,4),']'))
+  }
+  
+  if(aux2 < 0){
+    print('Error detected')
+  }
+  return(aux2)
+}

@@ -53,3 +53,7 @@ for(i in 1:nsim){
   store_power[i] <- IACT_NIM(dataset = iact_data, verbose = F)
 }
 
+#Power estimate:
+mean(store_power)
+#95% confidence intervals for power estimate
+binom.test(table(factor(store_power,c(1,0))))$conf.int

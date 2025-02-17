@@ -1,11 +1,10 @@
-
+# Convert from logit scale to probability (or proportion) scale
 InvLogit <- function(X){
   exp(X)/(1+exp(X))
 }
 
 
 #TIDY, and change name!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Don't output the LO????
 EHT_sim2 <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
                      rotations = 1,sigma_hut = 0.2, sigma_sleep = 0.3, sigma_net = 0.4, sigma_day = 0.1,
                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25), ITN_reps = 30){
@@ -325,6 +324,44 @@ cone_sim2 <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10,
   
   return(cone_data[, !(names(cone_data) %in% c('LO'))]) 
   
+}
+
+#Function for non-inf assessment for cone assay data
+cone_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB', verbose = T){
+  
+  FIC_mortality <- sum(dataset[dataset$arm==int_cat,]$tot_dead)/sum(dataset[dataset$arm==int_cat,]$total)
+  if(verbose == T){
+    print(FIC_mortality)
+  }
+  non_inf_margin <- ((FIC_mortality - NIM_pc) / (1- (FIC_mortality - NIM_pc))) / (FIC_mortality / (1- FIC_mortality)) 
+  if(verbose == T){
+    print(non_inf_margin)
+  }
+  
+  fit <- glm(
+    cbind(tot_dead, total - tot_dead) ~ arm + day, 
+    family = binomial, data = dataset 
+  )
+  summary(fit)
+  
+  OR1 <- exp(coef(summary(fit))[FE_label,"Estimate"])
+  OR1_lower <- exp(coef(summary(fit))[FE_label,"Estimate"] - 
+                     1.96*coef(summary(fit))[FE_label,'Std. Error'])
+  OR1_upper <- exp(coef(summary(fit))[FE_label,"Estimate"] + 
+                     1.96*coef(summary(fit))[FE_label,'Std. Error'])
+  
+  aux2 <- -1
+  if(OR1_lower > non_inf_margin){
+    aux2 <- 1
+  }else{
+    aux2 <- 0
+  }
+  #if verbose is T, print OR & 95% CI?
+  
+  if(aux2 < 0){
+    print('Error detected')
+  }
+  return(aux2)
 }
 
 #Clean & annotate!!

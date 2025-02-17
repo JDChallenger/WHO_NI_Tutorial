@@ -29,6 +29,7 @@ FIC_mortality <- sum(cone_data[cone_data$arm=='A',]$tot_dead)/sum(cone_data[cone
 non_inf_margin <- ((FIC_mortality - 0.07) / (1- (FIC_mortality - 0.07))) / (FIC_mortality / (1- FIC_mortality)) 
 c(OR_lower, OR, OR_upper)
 
+OR_lower > non_inf_margin #Non-inferiority assessment
 
 ################################################################################
 ####################  Simulation-based power calculation   #####################

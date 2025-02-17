@@ -35,7 +35,7 @@ OR_lower > non_inf_margin #Non-inferiority assessment
 ####################  Simulation-based power calculation   #####################
 ################################################################################
 
-#Here, we will use a function to simulate the synethetic datasets, and another 
+#Here, we will use a function to simulate the synthetic datasets, and another 
 # function to carryout the non-inferiority assessment
 
 nsim <- 1000

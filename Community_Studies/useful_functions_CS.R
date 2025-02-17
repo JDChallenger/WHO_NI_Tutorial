@@ -3,6 +3,10 @@ InvLogit <- function(X){
   exp(X)/(1+exp(X))
 }
 
+################################################################################
+########################## Functions for EHTs ##################################
+################################################################################
+
 
 #TIDY, and change name!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 EHT_sim2 <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
@@ -236,6 +240,55 @@ EHT_sim2 <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbo
   return(mosdata)
 }
 
+EHT_NIM <- function(dataset, NIM_pc = 0.07, verbose = F, int_cat = 'E2'){ # int_cat??
+  
+  FIC_mortality <- sum(dataset[dataset$net==int_cat,]$tot_dead)/sum(dataset[dataset$net==int_cat,]$n) # net, rather than arm??? n, rather than total??
+  if(verbose == T){
+    print(FIC_mortality)
+  }
+  non_inf_margin <- ((FIC_mortality - NIM_pc) / (1- (FIC_mortality - NIM_pc))) / (FIC_mortality / (1- FIC_mortality)) 
+  if(verbose == T){
+    print(non_inf_margin)
+  }
+  
+  #If we're sure we're assessing Non-inf of E5 compared to E2
+  dataset$net <- as.factor(dataset$net)
+  dataset$net <- relevel(dataset$net, int_cat) 
+  
+  fit <- glm(
+    cbind(tot_dead, n - tot_dead) ~ net + day + sleeper + hut, 
+    family = binomial, data = dataset
+  )
+  summary(fit)
+  
+  OR1 <- exp(coef(summary(fit))['netE5',"Estimate"])
+  OR1_lower <- exp(coef(summary(fit))['netE5',"Estimate"] - 
+                     1.96*coef(summary(fit))['netE5','Std. Error'])
+  OR1_upper <- exp(coef(summary(fit))['netE5',"Estimate"] + 
+                     1.96*coef(summary(fit))['netE5','Std. Error'])
+  
+  if(verbose == T){
+    print(OR1_lower)
+  }
+  
+  aux2 <- -1
+  if(OR1_lower > non_inf_margin){
+    aux2 <- 1
+  }else{
+    aux2 <- 0
+  }
+  
+  if(aux2 < 0){
+    print('Error detected')
+  }
+  return(aux2)
+  
+}
+
+################################################################################
+########################## Functions for cone assays ##################################
+################################################################################
+
 #TIDY AND ANNOTATE!!!!!!!!!!! CHANGE NAME????????????
 cone_sim2 <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10, 
                       sigma_net = 0.7, nday = -9, verbose = T, num_mosq = 5){ # add day?
@@ -364,6 +417,10 @@ cone_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB', 
   return(aux2)
 }
 
+################################################################################
+########################## Functions for tunnels ##################################
+################################################################################
+
 #Clean & annotate!!
 tunnel_sim2 <- function(mort = 0.4, #reps = 1, #need reps???
                         npos = 3, n_nets = 30,
@@ -470,6 +527,10 @@ tunnel_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB'
   }
   return(aux2)
 }
+
+################################################################################
+########################## Functions for IACTs ##################################
+################################################################################
 
 #change name, add more annotation. Should the number of days be left empty? For the user to define
 IACT_sim2 <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose = F,

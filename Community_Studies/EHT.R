@@ -44,7 +44,7 @@ OR_lower > non_inf_margin # Is the non-inferiority criterion satisfied? This sho
 ####################  Simulation-based power calculation   #####################
 ################################################################################
 
-#Here, we will use a function to simulate the synethetic datasets, and another 
+#Here, we will use a function to simulate the synthetic datasets, and another 
 # function to carryout the non-inferiority assessment
 
 #full details of the arguments of each function

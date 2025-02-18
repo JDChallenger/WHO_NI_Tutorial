@@ -57,3 +57,62 @@ for(i in 1:nsim){
 mean(store_power)
 #95% confidence intervals for power estimate
 binom.test(table(factor(store_power,c(1,0))))$conf.int
+
+#Now we will make Figure 4.1 in the tutorial. Note: this figure used a higher number
+# of simulations, to further reduce stochastic variation. But note that changing 
+# nsim to 5000 will make this very slow to run (by default nsim=1000 here)
+
+nsim <- 1000
+di <- data.frame()
+dayz <- seq(28,76,16)
+num_mosq <- seq(15,25,5)
+vblist <- c(T,rep(F,nsim-1)) # list for the verbose option. Hence we will see the details of the study for the first simulation only
+
+for(l in 1:length(num_mosq)){ # no. of mosquitoes
+  for(k in 1:length(dayz)){ # days
+    
+    store_sigma_net <- rep(0,9)
+    store_sigma_net_ci1 <- rep(0,9)
+    store_sigma_net_ci2 <- rep(0,9)
+    for(j in 1:length(store_sigma_net)){
+      
+      store_power <- rep(NA, nsim)
+      for(i in 1:nsim){
+        mosdata <- IACT_sim2(sigma_net = 0.1*j, n_day = dayz[k], n_mosq = num_mosq[l], 
+                             verbose = vblist[i], n_nets = 30)
+        store_power[i] <- IACT_NIM(dataset = mosdata, verbose = vblist[i])
+      }
+      print(paste0('J',j))
+      
+      store_sigma_net[j] <- mean(store_power)
+      store_sigma_net_ci1[j] <- binom.test(table(factor(store_power,c(1,0))))$conf.int[1]
+      store_sigma_net_ci2[j] <- binom.test(table(factor(store_power,c(1,0))))$conf.int[2]
+    }
+    aux <- data.frame('sigma_net' = 0.1*(1:9), 'power' = store_sigma_net,
+                      'power_ci1' = store_sigma_net_ci1, 
+                      'power_ci2' = store_sigma_net_ci2, 
+                      'days' = rep(dayz[k], length(store_sigma_net_ci1)),
+                      'num_mosq' = rep(num_mosq[l], length(store_sigma_net_ci1))
+    )
+    di <- rbind(di, aux)
+    print(paste0('k equal: ',k))
+  }
+  print(paste0('l equal: ',l))
+}
+head(di)
+date()  
+
+f_names <- c(
+  `15` = "15 mosquitoes",
+  `20` = "20 mosquitoes",
+  `25` = "25 mosquitoes"
+)
+
+ggplot(di) + geom_hline(yintercept = 80, alpha = .25) + 
+  geom_line(aes(x = sigma_net, y = 100*power, color = factor(days))) +
+  labs(color = 'No. of\nStudy Days', fill = 'No. of\nStudy Days') +
+  #scale_x_continuous(breaks = seq(0,0.9,0.3)) +
+  ylab('Statistical Power (%)') + xlab('Between ITN heterogeneity (s.d.)') +
+  theme_classic() + facet_wrap(~num_mosq, labeller = as_labeller(f_names)) + 
+  ylim(c(50,100)) + geom_ribbon(aes(x = sigma_net, 
+      ymin = 100*power_ci1, ymax = 100*power_ci2, fill = factor(days)),alpha = .3)

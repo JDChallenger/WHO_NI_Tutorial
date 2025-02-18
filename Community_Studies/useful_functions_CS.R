@@ -533,7 +533,7 @@ tunnel_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB'
 ################################################################################
 
 #change name, add more annotation. Should the number of days be left empty? For the user to define
-IACT_sim2 <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose = F,
+IACT_sim <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose = F,
                       mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
                       sigma_net = 0.4, n_nets = 30){
   if(n_comp%%n_arm !=0){
@@ -643,7 +643,7 @@ IACT_sim2 <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose =
     mosdata$tot_dead[i] <- aux
   }
   if(verbose==T){
-    print(paste0('Dim. of data: ',dim(mosdata)))
+    print(paste0('No. of data points: ',dim(mosdata)[1]))
   }
   
   return(mosdata[, !(names(mosdata) %in% c('LO'))]) 

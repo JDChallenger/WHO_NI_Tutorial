@@ -8,8 +8,7 @@ source('Community_Studies/useful_functions_CS.R')
 #Here, we will simulate a dataset, and then analyse it.
 # The simulated dataset could be replaced with a real one
 
-#Update function name
-iact_data <- IACT_sim2()
+iact_data <- IACT_sim()
 str(iact_data)
 head(iact_data)
 
@@ -48,7 +47,7 @@ OR_lower > non_inf_margin
 nsim <- 1000 # the number of simulations to carry out
 store_power <- rep(NA, nsim) # a container for the outcome of each simulated study
 for(i in 1:nsim){
-  iact_data <- IACT_sim2(sigma_net = 0.9, n_day = 44, n_mosq = 20, 
+  iact_data <- IACT_sim(sigma_net = 0.9, n_day = 44, n_mosq = 20, 
                        verbose = F, n_nets = 30)
   store_power[i] <- IACT_NIM(dataset = iact_data, verbose = F)
 }
@@ -78,7 +77,7 @@ for(l in 1:length(num_mosq)){ # no. of mosquitoes
       
       store_power <- rep(NA, nsim)
       for(i in 1:nsim){
-        mosdata <- IACT_sim2(sigma_net = 0.1*j, n_day = dayz[k], n_mosq = num_mosq[l], 
+        mosdata <- IACT_sim(sigma_net = 0.1*j, n_day = dayz[k], n_mosq = num_mosq[l], 
                              verbose = vblist[i], n_nets = 30)
         store_power[i] <- IACT_NIM(dataset = mosdata, verbose = vblist[i])
       }

@@ -9,7 +9,7 @@ InvLogit <- function(X){
 
 
 #TIDY
-EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
+EHT_sim_CS <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
                      rotations = 1,sigma_hut = 0.2, sigma_sleep = 0.3, sigma_net = 0.4, sigma_day = 0.1,
                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25), ITN_reps = 30){
   #Check length(responses) == n_arms

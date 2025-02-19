@@ -289,8 +289,8 @@ EHT_NIM <- function(dataset, NIM_pc = 0.07, verbose = F, int_cat = 'E2'){ # int_
 ########################## Functions for cone assays ##################################
 ################################################################################
 
-#TIDY AND ANNOTATE!!!!!!!!!!! CHANGE NAME????????????
-cone_sim <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10, 
+#TIDY AND ANNOTATE!
+cone_sim <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 30, 
                       sigma_net = 0.7, nday = -9, verbose = T, num_mosq = 5){ # add day?
   cone_data <-
     data.frame(expand.grid(

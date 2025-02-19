@@ -42,7 +42,8 @@ nsim <- 1000
 store_power <- rep(NA, nsim) # a container for the outcome of each simulated study
 
 for(i in 1:nsim){
- cone_data <- cone_sim(cone_mort = 0.4, npos = 4, rep = 4, nday = 20, verbose = F) # check the number of replicates required 
+ cone_data <- cone_sim(cone_mort = 0.4, npos = 4, rep = 4, n_nets = 30,
+                       nday = 20, verbose = F)
  store_power[i] <- cone_NIM(dataset = cone_data, verbose = F)
 }
 

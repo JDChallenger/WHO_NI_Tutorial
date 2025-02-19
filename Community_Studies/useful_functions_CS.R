@@ -8,8 +8,8 @@ InvLogit <- function(X){
 ################################################################################
 
 
-#TIDY, and change name!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-EHT_sim2 <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
+#TIDY
+EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
                      rotations = 1,sigma_hut = 0.2, sigma_sleep = 0.3, sigma_net = 0.4, sigma_day = 0.1,
                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25), ITN_reps = 30){
   #Check length(responses) == n_arms
@@ -290,7 +290,7 @@ EHT_NIM <- function(dataset, NIM_pc = 0.07, verbose = F, int_cat = 'E2'){ # int_
 ################################################################################
 
 #TIDY AND ANNOTATE!!!!!!!!!!! CHANGE NAME????????????
-cone_sim2 <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10, 
+cone_sim <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 10, 
                       sigma_net = 0.7, nday = -9, verbose = T, num_mosq = 5){ # add day?
   cone_data <-
     data.frame(expand.grid(
@@ -422,7 +422,7 @@ cone_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB', 
 ################################################################################
 
 #Clean & annotate!!
-tunnel_sim2 <- function(mort = 0.4, #reps = 1, #need reps???
+tunnel_sim <- function(mort = 0.4, #reps = 1, #need reps???
                         npos = 3, n_nets = 30,
                         sigma_net = 0.7, n_tunnels = 5, verbose = F, n_mosq = 50){
   

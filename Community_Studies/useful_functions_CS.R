@@ -25,10 +25,6 @@ EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbos
     rotations <- 1
     print('Trial simulated for rotations = 1')
   }
-  #if(varO < 0 ){ #Reject negative variance for the random effect
-  # print('The variance of a random effect must be positive')
-  #  return(-9)
-  #}
   if(meanMos < 0 | dispMos < 0 ){ #Mean & dispersion parameters must both be positive
     print('Parameters for mosquito counts should be positive')
     return(-9)
@@ -50,7 +46,7 @@ EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbos
       week = 1:nrow(aux2),
       night = 1:npr
     )
-  mosdata <- mosdata[order(mosdata$hut, mosdata$week, mosdata$night),] # would day be better than night? 
+  mosdata <- mosdata[order(mosdata$hut, mosdata$week, mosdata$night),] 
   
   mosdata$net <- NA
   count <- 1
@@ -60,13 +56,13 @@ EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbos
       count <- count + 1
     }
   }
-  #table(mosdata$net, useNA = 'a')
+  
   mosdata$sleeper <- NA
-  aux3 <- sample(1:n_arms) #was '7'- a mistake?
+  aux3 <- sample(1:n_arms) 
   
   for(i in 1:n_arms){ # number of weeks for one rotation
     aux4 <- c(aux3[c(i:n_arms)],aux3[seq_len(i-1)])
-    #print(aux4)
+
     for(j in 1:npr){ #nights per round
       mosdata[mosdata$week==i & mosdata$night==j,]$sleeper <- 
         c(aux4[c(j:n_arms)],aux4[seq_len(j-1)])
@@ -150,37 +146,6 @@ EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbos
     mosdata[mosdata$net==lu[i],]$net_id <- lizt
   }
   
-  
-  # n_nets <- round(dim(mosdata[mosdata$net =='C',])[1]/4)#ceiling(dim(mosdata[mosdata$net =='C',])[1]/4)#ceiling(table(mosdata$net)[1][[1]]/4)
-  # if(verbose == T){
-  #   #print(table(mosdata$net))
-  #   print('n_nets: ',n_nets)
-  # }
-  # 
-  # 
-  # lu <- unique(as.character(mosdata$net))
-  # mosdata2 <- data.frame()
-  # for(i in 1:length(lu)){ # length(lu)
-  #   aux <- mosdata[mosdata$net==lu[i],]
-  #   ln <- dim(aux)[1]
-  #   #count <- 0
-  #   for(j in 1:n_nets){
-  #     if(j < n_nets){
-  #       aux$net_id[(4*(j-1) + 1) : (4*j)] <- paste(lu[i], j, sep = '_')
-  #     }else{
-  #       #aux$net_id[(4*(j-1) + 1) : (4*j - 2)] <- paste(lu[i], j, sep = '_')
-  #       aux$net_id[(4*(j-1) + 1) : ln] <- paste(lu[i], j, sep = '_')
-  #       #print(count)
-  #     }
-  #     #count <- count + 1
-  #   }
-  #   mosdata2 <- rbind(mosdata2, aux)
-  # }
-  # #View(mosdata2)
-  # #table(mosdata2$net_id)
-  # 
-  
-  
   #MOrtalities:
   # C: Untreated Control (5% mortality)
   # E1: Unwashed Test ITN (60% mortality)
@@ -216,12 +181,8 @@ EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbos
     s4 <- which(lu==mosdata[i,4]) # arm
     s5 <- which(lu2==mosdata[i,9]) # net ID
     
-    #print(c(s1,s2,s3,s4,s5))
-    
     bray <- vec_hut[s1] + vec_day[s2] + vec_sleep[s3] + vec_arm[s4] + vec_net[s5]
-    #print(bray)
     mosdata$LO[i] <- bray
-    
   }
   
   #simulate trial
@@ -231,13 +192,11 @@ EHT_sim <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbos
     mosdata$tot_dead[i] <- aux
   }
   
-  #Then analyse data in GLMM
-  
   mosdata$sleeper <- as.factor(mosdata$sleeper)
   mosdata$hut <- as.factor(mosdata$hut)
   mosdata$day <- as.factor(mosdata$day)
   
-  return(mosdata)
+  return(mosdata[, !(names(mosdata) %in% c('LO'))]) 
 }
 
 EHT_NIM <- function(dataset, NIM_pc = 0.07, verbose = F, int_cat = 'E2'){ # int_cat??

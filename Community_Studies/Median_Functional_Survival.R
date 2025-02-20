@@ -5,10 +5,13 @@
 #Unless you are an experience Rstan user, we recommend following the simplified
 # installation instructions, by running the following commands:
 
-#First install some auxiliary packages
-install.packages(c("coda","mvtnorm","devtools","loo","dagitty"))
-#Then install the 'lite' version of the package
-devtools::install_github("rmcelreath/rethinking@slim")
+#First install some auxiliary packages (UNCOMMENT THIS COMMAND)
+#install.packages(c("coda","mvtnorm","devtools","loo","dagitty"))
+#Then install the 'lite' version of the package (UNCOMMENT THIS COMMAND)
+#devtools::install_github("rmcelreath/rethinking@slim")
+
+#Once the packages are installed, you can reinstate the comments above (so that 
+# you don't re-install the packages every time you run the script)
 
 ################################################################################
 
@@ -92,7 +95,7 @@ df <- data.frame('t' = seq(0,499)/100, 'mean' = MSF_curve,
 
 #Let's build up the plot, starting with the black curve
 MSF_plot <- ggplot() + geom_line(data = df, aes(x=t,y=mean)) + 
-  theme_classic() + xlim(NA,4.6) + 
+  theme_classic() +  
   ylab('Functional survival of ITNs (proportion)') + 
   xlab('Time since ITNs distributed (years)')
 MSF_plot

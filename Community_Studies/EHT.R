@@ -9,7 +9,8 @@ source('Community_Studies/useful_functions_CS.R')
 # The simulated dataset could be replaced with a real one
 
 #Update function name
-mosdata <- EHT_sim_CS(n_arms = 9, meanMos = 10)
+mosdata <- EHT_sim_CS(n_arms = 9, meanMos = 10,rotations = 1, sigma_net = 0.9,
+                      n_nets = 30, verbose = T)
 str(mosdata)
 head(mosdata)
 

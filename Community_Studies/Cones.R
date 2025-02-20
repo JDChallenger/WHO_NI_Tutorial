@@ -7,7 +7,8 @@ source('Community_Studies/useful_functions_CS.R')
 
 #Here, we will simulate a dataset, and then analyse it.
 # The simulated dataset could be replaced with a real one
-cone_data <- cone_sim()
+cone_data <- cone_sim(reps = 4, npos = 4, n_nets = 30, 
+                       verbose = T, num_mosq = 5, nday = 30)
 head(cone_data)
 str(cone_data)
 

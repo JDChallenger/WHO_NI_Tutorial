@@ -10,7 +10,7 @@
 #Then install the 'lite' version of the package (UNCOMMENT THIS COMMAND)
 #devtools::install_github("rmcelreath/rethinking@slim")
 
-#Once the packages are installed, you can reinstate the comments above (so that 
+#Once the packages are installed, you can reinstate the comment symbols above (so that 
 # you don't re-install the packages every time you run the script)
 
 ################################################################################

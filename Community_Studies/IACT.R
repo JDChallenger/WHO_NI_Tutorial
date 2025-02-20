@@ -8,7 +8,10 @@ source('Community_Studies/useful_functions_CS.R')
 #Here, we will simulate a dataset, and then analyse it.
 # The simulated dataset could be replaced with a real one
 
-iact_data <- IACT_sim()
+#By default, the study has 9 arms and 18 compartments
+iact_data <- IACT_sim(n_day = 28, n_mosq = 15, verbose = T,
+                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
+                      sigma_net = 0.9, n_nets = 30)
 str(iact_data)
 head(iact_data)
 

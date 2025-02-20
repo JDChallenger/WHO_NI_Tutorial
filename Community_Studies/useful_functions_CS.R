@@ -125,7 +125,7 @@ EHT_sim_CS <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, ver
   }
   remainder <- dim(mosdata[mosdata$net =='C',])[1] %% n_nets # this could be zero
   if(verbose==T){
-    print(paste0(remainder, ' replicates get ',ceiling(data_pts_per_ITN),' data points; ',n_nets - remainder,' replicates get ',floor(data_pts_per_ITN),' data points'))
+    print(paste0(remainder, ' nets get ',ceiling(data_pts_per_ITN),' data points; ',n_nets - remainder,' nets get ',floor(data_pts_per_ITN),' data points'))
   }
   
   #for each arm in turn, generate the entries for net_id. I'm assuming that order doesn't matter here
@@ -275,7 +275,7 @@ cone_sim <- function(cone_mort = 0.5, reps = 4, npos = 4, n_nets = 30,
       #print(dim(cone_data[cone_data$llin_code==lu[2*i - 1],]))
     }
     if(verbose==T){
-      print(paste0('Cone tests per day: ',pday))
+      print(paste0('Cone tests per day: ',pday)) # for how many days? 
     }
     #table(cone_data$day, useNA = 'a')
   }else{
@@ -557,7 +557,7 @@ IACT_sim <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose = 
     flr <- floor(n_day * n_comp / n_arm / n_nets)
     rem <- (n_day * n_comp / n_arm ) %% n_nets
     if(verbose==T){
-      print(paste0('In each arm, ',n_nets - rem,' nets are used ',flr,' times; ',rem,' are used ',flr + 1,' times.'))
+      print(paste0('In each arm, ',n_nets - rem,' nets are used ',flr,' time(s); ',rem,' are used ',flr + 1,' times.'))
     }  
     
     lu <- unique(mosdata$net)

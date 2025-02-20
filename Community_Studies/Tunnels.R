@@ -7,7 +7,8 @@ source('Community_Studies/useful_functions_CS.R')
 
 #Here, we will simulate a dataset, and then analyse it.
 # The simulated dataset could be replaced with a real one
-tunnel_data <- tunnel_sim(verbose = T)
+tunnel_data <- tunnel_sim(npos = 3, n_nets = 30,
+                          sigma_net = 0.7, n_tunnels = 5, verbose = T, n_mosq = 50)
 head(tunnel_data)
 str(tunnel_data)
 

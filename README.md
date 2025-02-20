@@ -8,5 +8,5 @@ The R script 'power_calculator_user_script.R' contains a simulation-based method
 
 Before power can be calculated, the design of the EHT must be specified. As outlined [here](https://doi.org/10.1016/j.crpvbd.2023.100115), the number of mosquitoes entering the hut and the level of variability present in the assay will both influence power (as will the trial duration).  The script 'power_calculator_user_script.R' provides details on how the scenario in question should be specified. The functions that this script uses are contained in 'power_calculator_functions_FE.R'. 
 
-**Update: February 2025:**
+## Update: February 2025:
 This repository has been updated, to also include a tutorial on assessing field-aged nets, collected during community studies. All the materials pertaining to community studies can be found in the folder 'Community_Studies'

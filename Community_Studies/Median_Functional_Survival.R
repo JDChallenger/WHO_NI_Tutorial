@@ -1,3 +1,17 @@
+################################################################################
+############### Installation instructions for the rethinking package ###########
+################################################################################
+
+#Unless you are an experience Rstan user, we recommend following the simplified
+# installation instructions, by running the following commands:
+
+#First install some auxiliary packages
+install.packages(c("coda","mvtnorm","devtools","loo","dagitty"))
+#Then install the 'lite' version of the package
+devtools::install_github("rmcelreath/rethinking@slim")
+
+################################################################################
+
 library(ggplot2)
 library(rethinking)
 

@@ -9,7 +9,7 @@ source('Community_Studies/useful_functions_CS.R')
 # The simulated dataset could be replaced with a real one
 
 #Update function name
-mosdata <- EHT_sim(n_arms = 9, meanMos = 10)
+mosdata <- EHT_sim_CS(n_arms = 9, meanMos = 10)
 str(mosdata)
 head(mosdata)
 
@@ -52,7 +52,7 @@ OR_lower > non_inf_margin # Is the non-inferiority criterion satisfied? This sho
 nsim <- 1000 # the number of simulations to carry out
 store_power <- rep(NA, nsim) # a container for the outcome of each simulated study
 for(i in 1:nsim){
-  mosdata <- EHT_sim(n_arms = 9, npr = 9, mos_det = 0,
+  mosdata <- EHT_sim_CS(n_arms = 9, npr = 9, mos_det = 0,
                      meanMos = 10, rotations = 1,
                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
                      sigma_net = 0.5)
@@ -83,7 +83,7 @@ for(k in 1:length(num_mosq)){ # mosquito numbers
     store_power <- rep(NA, nsim)
     for(i in 1:nsim){
       
-      mosdata <- EHT_sim(n_arms = 9, npr = 9, mos_det = 0, meanMos = num_mosq[k], rotations = 1, 
+      mosdata <- EHT_sim_CS(n_arms = 9, npr = 9, mos_det = 0, meanMos = num_mosq[k], rotations = 1, 
                           mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
                           sigma_net = 0.1*j)
       
@@ -121,7 +121,7 @@ for(k in 1:length(num_mosq)){ # mosquito numbers
     store_power <- rep(NA, nsim)
     for(i in 1:nsim){
       
-      mosdata <- EHT_sim(n_arms = 9, npr = 9, mos_det = 0, meanMos = num_mosq[k], rotations = 1.5, 
+      mosdata <- EHT_sim_CS(n_arms = 9, npr = 9, mos_det = 0, meanMos = num_mosq[k], rotations = 1.5, 
                           mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
                           sigma_net = 0.1*j)
       
@@ -159,7 +159,7 @@ for(k in 1:length(num_mosq)){ # mosquito numbers
     store_power <- rep(NA, nsim)
     for(i in 1:nsim){
       
-      mosdata <- EHT_sim(n_arms = 12, npr = 12, mos_det = 0, meanMos = 20, rotations = 1, 
+      mosdata <- EHT_sim_CS(n_arms = 12, npr = 12, mos_det = 0, meanMos = 20, rotations = 1, 
                           mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25,0.5,0.35,0.25),
                           sigma_net = 0.1*j)
       

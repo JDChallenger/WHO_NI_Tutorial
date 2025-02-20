@@ -18,7 +18,7 @@ head(iact_data)
 #Make 'net' a factor variable. Change the levels of the factor
 
 iact_data$net <- as.factor(iact_data$net)
-iact_data$net <- relevel(iact_data$net, 'N3') 
+iact_data$net <- relevel(iact_data$net, 'N3')
 levels(iact_data$net)
 
 fit <- glm(

@@ -10,8 +10,8 @@ InvLogit <- function(X){
 
 #TIDY
 EHT_sim_CS <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, verbose = F,
-                     rotations = 1,sigma_hut = 0.2, sigma_sleep = 0.3, sigma_net = 0.4, sigma_day = 0.1,
-                     mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25), ITN_reps = 30){
+                     rotations = 1, sigma_net = 0.9,
+                     mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25), n_nets = 30){
   #Check length(responses) == n_arms
   if(n_arms != length(mortalities)){
     print('Operation was not executed. Check the number of arms, and corresponding vector of mosquito mortalities')
@@ -119,13 +119,13 @@ EHT_sim_CS <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, ver
   }
   
   mosdata$net_id <- NA # round down, so that the last net has extra data pts
-  data_pts_per_ITN <- dim(mosdata[mosdata$net =='C',])[1]/ITN_reps # NOTE: this may now vary by arm, if we're doubling up. Need to do iteratively, for each arm??
+  data_pts_per_ITN <- dim(mosdata[mosdata$net =='C',])[1]/n_nets # NOTE: this may now vary by arm, if we're doubling up. Need to do iteratively, for each arm??
   if(verbose==T){
     print(paste0('data pts per replicate: ',data_pts_per_ITN))
   }
-  remainder <- dim(mosdata[mosdata$net =='C',])[1] %% ITN_reps # this could be zero
+  remainder <- dim(mosdata[mosdata$net =='C',])[1] %% n_nets # this could be zero
   if(verbose==T){
-    print(paste0(remainder, ' replicates get ',ceiling(data_pts_per_ITN),' data points; ',ITN_reps - remainder,' replicates get ',floor(data_pts_per_ITN),' data points'))
+    print(paste0(remainder, ' replicates get ',ceiling(data_pts_per_ITN),' data points; ',n_nets - remainder,' replicates get ',floor(data_pts_per_ITN),' data points'))
   }
   
   #for each arm in turn, generate the entries for net_id. I'm assuming that order doesn't matter here
@@ -137,7 +137,7 @@ EHT_sim_CS <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, ver
         lizt <- c(lizt, paste(lu[i], j, sep = '_'))
       }
     }
-    for(j in 1:(ITN_reps - remainder)){
+    for(j in 1:(n_nets - remainder)){
       for(k in 1:floor(data_pts_per_ITN)){
         lizt <- c(lizt, paste(lu[i], j + remainder, sep = '_'))
       }
@@ -160,10 +160,10 @@ EHT_sim_CS <- function(n_arms, npr = 9, mos_det = 0, meanMos, dispMos = 1.5, ver
   #Hence:
   vec_arm <- qlogis(mortalities)#qlogis(c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25))
   
-  vec_day <- rnorm(length(unique(mosdata$day)),0,sigma_day)#rnorm(n_arms*npr,0,sigma_day)
-  vec_hut <- rnorm(n_arms,0,sigma_hut)
-  vec_sleep <- rnorm(n_arms,0,sigma_sleep)
-  vec_net <- rnorm(ITN_reps*n_arms,0,sigma_net) # n_nets is now a user-supplied argument
+  vec_day <- rnorm(length(unique(mosdata$day)),0,0.2)#rnorm(n_arms*npr,0,sigma_day)
+  vec_hut <- rnorm(n_arms,0,0.2)
+  vec_sleep <- rnorm(n_arms,0,0.2)
+  vec_net <- rnorm(n_nets*n_arms,0,sigma_net) # n_nets is now a user-supplied argument
   
   ll <- dim(mosdata)[1]
   lu2 <- unique(mosdata$net_id)
@@ -494,7 +494,7 @@ tunnel_NIM <- function(dataset, NIM_pc = 0.07, int_cat = 'A',  FE_label = 'armB'
 #change name, add more annotation. Should the number of days be left empty? For the user to define
 IACT_sim <- function(n_day = 24, n_comp = 18, n_mosq = 15, n_arm = 9, verbose = F,
                       mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
-                      sigma_net = 0.4, n_nets = 30){
+                      sigma_net = 0.9, n_nets = 30){
   if(n_comp%%n_arm !=0){
     print('Results may be unrealiable if the number of compartments is 
          not a multiple of (or equal to) the number of trial arms')

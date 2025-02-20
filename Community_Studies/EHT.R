@@ -55,7 +55,7 @@ for(i in 1:nsim){
   mosdata <- EHT_sim_CS(n_arms = 9, npr = 9, mos_det = 0,
                      meanMos = 10, rotations = 1,
                      mortalities = c(0.05,0.6,0.25,0.5,0.35,0.25,0.60,0.25,0.25),
-                     sigma_net = 0.5)
+                     sigma_net = 0.8)
   store_power[i] <- EHT_NIM(dataset = mosdata, verbose = F)
 }
 

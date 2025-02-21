@@ -107,7 +107,7 @@ m_names <- c(
 )
 
 ggplot(dc) + geom_line(aes(x = sigma_net, y = 100*power, color = factor(reps))) + 
-  geom_hline(yintercept = 80) +
+  geom_hline(yintercept = 80) + ylim(c(0,NA)) + 
   facet_wrap(~mort, labeller = as_labeller(m_names)) + theme_classic() + 
   labs(color = 'Number of\nReplicates') + 
   xlab('Between-net heterogeneity (s.d.)') + ylab('Statistical power (%)')

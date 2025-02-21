@@ -66,6 +66,7 @@ morts <- seq(0.1,0.4,0.1)
 for(l in 1:length(num_rep)){
   for(k in 1:length(morts)){ # mortality
     
+    #Tip: you could speed up the simulations, by choosing fewer values for sigma_net. E.g. seq(0.1,0.9,0.2)-- 5 values, or c(0.3,0.6,0.9)-- 3 values
     store_sigma_net <- rep(0,9)
     store_sigma_net_ci1 <- rep(0,9)
     store_sigma_net_ci2 <- rep(0,9)
@@ -108,4 +109,5 @@ m_names <- c(
 ggplot(dc) + geom_line(aes(x = sigma_net, y = 100*power, color = factor(reps))) + 
   geom_hline(yintercept = 80) +
   facet_wrap(~mort, labeller = as_labeller(m_names)) + theme_classic() + 
+  labs(color = 'Number of\nReplicates') + 
   xlab('Between-net heterogeneity (s.d.)') + ylab('Statistical power (%)')

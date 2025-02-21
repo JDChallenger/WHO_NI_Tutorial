@@ -76,7 +76,9 @@ num_mosq <- seq(5,20,5)
 #morts <- seq(0.1,0.5,0.1) vary mortality too??
 
 for(k in 1:length(num_mosq)){ # mosquito numbers
-  store_sigma_net <- rep(0,9) # change these names? 
+  
+  #Tip: you could speed up the simulations, by choosing fewer values for sigma_net. E.g. seq(0.1,0.9,0.2)-- 5 values, or c(0.3,0.6,0.9)-- 3 values
+  store_sigma_net <- rep(0,9) 
   store_sigma_net_ci1 <- rep(0,9)
   store_sigma_net_ci2 <- rep(0,9)
   for(j in 1:length(store_sigma_net)){

@@ -57,6 +57,7 @@ binom.test(table(factor(store_power,c(1,0))))$conf.int
 
 ################################################################################
 #Now remake Figure 5.2 from the tutorial
+#Note: this will be quite slow!
 
 dtX2 <- data.frame() # empty dataframe, in which to store results
 num_mosq <- seq(10,60,10)
@@ -97,7 +98,7 @@ for(l in 1:length(num_mosq)){ # mosquito numbers
 }
 head(dtX2)
 
-#VT facet with new labels
+#labels for the facets
 f_names <- c(
   `10` = "10 mosquitoes",
   `20` = "20 mosquitoes",

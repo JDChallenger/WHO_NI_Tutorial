@@ -7,7 +7,7 @@ source('Community_Studies/useful_functions_CS.R')
 
 #Here, we will simulate a dataset, and then analyse it.
 # The simulated dataset could be replaced with a real one
-cone_data <- cone_sim(reps = 4, npos = 4, n_nets = 30, 
+cone_data <- cone_sim(reps = 4, npos = 3, n_nets = 30, 
                        verbose = T, num_mosq = 5, nday = 30)
 head(cone_data)
 str(cone_data)
@@ -43,7 +43,7 @@ nsim <- 1000
 store_power <- rep(NA, nsim) # a container for the outcome of each simulated study
 
 for(i in 1:nsim){
- cone_data <- cone_sim(cone_mort = 0.4, npos = 4, rep = 4, n_nets = 30,
+ cone_data <- cone_sim(cone_mort = 0.4, npos = 3, rep = 4, n_nets = 30,
                        nday = 20, verbose = F)
  store_power[i] <- cone_NIM(dataset = cone_data, verbose = F)
 }
@@ -58,6 +58,7 @@ binom.test(table(factor(store_power,c(1,0))))$conf.int
 
 #Note: this will be quite slow!
 
+nsim <- 1000
 dc <- data.frame() # empty data frame to store results
 num_rep <- c(3,4,5) # number of replicates to perform
 morts <- seq(0.1,0.4,0.1)
@@ -72,7 +73,7 @@ for(l in 1:length(num_rep)){
       
       store_power <- rep(NA, nsim)
       for(i in 1:nsim){
-        test <- cone_sim(sigma_net = 0.1*j, n_nets = 30, reps = num_rep[l], npos = 4,
+        test <- cone_sim(sigma_net = 0.1*j, n_nets = 30, reps = num_rep[l], npos = 3,
                          cone_mort = morts[k], num_mosq = 5, verbose = F, nday = 16)
         store_power[i] <- cone_NIM(dataset = test, verbose = F)
       }
@@ -95,6 +96,16 @@ for(l in 1:length(num_rep)){
 }
 
 head(dc)
-date()
 
+#labels for the facets
+m_names <- c(
+  `0.1` = "Mosquito mortality = 0.1",
+  `0.2` = "Mosquito mortality = 0.2",
+  `0.3` = "Mosquito mortality = 0.3",
+  `0.4` = "Mosquito mortality = 0.4"
+)
 
+ggplot(dc) + geom_line(aes(x = sigma_net, y = 100*power, color = factor(reps))) + 
+  geom_hline(yintercept = 80) +
+  facet_wrap(~mort, labeller = as_labeller(m_names)) + theme_classic() + 
+  xlab('Between-net heterogeneity (s.d.)') + ylab('Statistical power (%)')

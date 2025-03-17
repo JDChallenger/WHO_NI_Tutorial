@@ -76,18 +76,22 @@ hist(rnbinom(1000, mu = meanMos, size = dispMos))
 #be seen to vary widely (see Supplementary Table 1 of this paper:
 # https://doi.org/10.1016/j.crpvbd.2023.100115)
 # The default value of 0.9 (this is the variance of the random effect) is 
-# a reasonable value to use, if you're unsure.
+# a reasonable value to use, if you're unsure. 
 
-#Before calculating power, let's simulate 1 trial, to check everything looks OK
+# Before calculating power, it is recommended to run a single trial with the 
+# relevant parameter values. In this way, you can explore the simulated dataset
+# in the same way you would for a real hut trial. This allows you to check that 
+# the study design you have specified in the R function matches your desired design.
+
 xc <- simulate_trial_ITN(n_arms = 6, npr = 6, 
-                         responses = c(0.5,0.5,0.5,0.425,0.55,0.33),
-               varO = 0.9, rotations = 1, mos_det = 0, meanMos = 29, dispMos = 1)
+                         responses = c(0.1,0.5,0.5,0.425,0.55,0.33),
+               varO = 0.9, rotations = 1, mos_det = 0, meanMos = 20, dispMos = 1)
 dim(xc)
 head(xc)
 table(xc$net)
 table(xc$hut)
 table(xc$sleeper)
-hist(xc$n)
+hist(xc$n) # The distribution of mosquito counts
 #We can calculate the total number of mosquitoes in each arm like this: 
 tapply(xc$n, xc$net, mean, na.rm = F)
 #... and the total number of dead mosquitoes in each arm like this:
@@ -151,16 +155,42 @@ detectCores()
 # how power varies with (e.g.) the average number of mosquitoes per hut per night (meanMos). We'll 
 # show an example of this in the IRS section below.
 
+#########################################################################################
+##############                  Worked Example for ITNs                   ###############
+#########################################################################################
+
+
+# Let's calculate power for an illustrative example. We wish to carry out a non-inferiority trial,
+# comparing a washed candidate net to a washed comparator net (this is the comparison required for WHO PQ).
+# For both of these, we expect a mosquito mortality of about 20% (in this example).
+# We run a 7-arm trial: in the responses vector, we put the washed
+# mortality of the comparator net in the third position, and the washed candidate net in the fifth position.
+# we use the argument 'aoi' to indicate the arms we wish to use for the non-inferiority assessment, and
+# we set 'trial = 3' (see above). We perform one full rotation and run the trial for 6 days a week 
+# (npr = 'nights per rotation' = 6). Based on recent observations (at our imagined field site),
+# we expect about 10 mosquitoes per hut per night.
+# We use the variable NIM outlined above, based on a maximum acceptable 
+# difference in mortality of 7% 
+
 t1 <- Sys.time()
 power_calculator_ITN(parallelise = 0, trial = 3, npr = 6, rotations = 1, 
-     nsim = 500, n_arms = 7, mos_det = 1, meanMos = 7, varO = .9, 
+     nsim = 500, n_arms = 7, mos_det = 1, meanMos = 10, varO = .9, 
      NIMvar = 1, NIMpc = 7,
-     dispMos = .6, aoi = c(4,6), responses = c(0.15,0.5,0.5,0.45,0.5,0.5,0.5))
+     dispMos = 1, aoi = c(3,5), responses = c(0.15,0.5,0.2,0.5,0.2,0.4,0.3))
 t2 <- Sys.time()
 t2 - t1
 #system("say Just finished!") #On Mac, this command alerts you that the function has finished
 # I don't think this works on Windows, but you could look at the beepr package and use the function beepr::beep()
 
+# For the default parameters used here, the power is rather low (~65%, although this will vary a little,
+# each time you estimate it, due to random variation. Increasing the number of simulations will
+# reduce this variation). Two options you could use to increase the power here could be: 
+# (i) Choose npr = 7, i.e. allow the sleepers to be rotated around all the huts 
+# (which for a 7-hut trial takes 7 days) before rotating the nets; 
+# (ii) Run a longer trial, by (e.g.) using 'rotations=1.5', to run an extra half rotation
+# In this instance, making both these changes should result in power > 80%. 
+# Alternatively, running the study in a location (or a time of year) with higher mosquito densities
+# would make the study easier to power.
 
 ####################### EHTs involving IRS ############################## 
 
@@ -195,7 +225,7 @@ xd <- simulate_trial_IRS(n_arms = 4, rep_IRS = 2, rep_C = 2,
                   dispMos = 0.5)
 dim(xd)
 head(xd)
-table(xd$net) #Note: for IRS, 'net' really means 'trial arm'. I will try to udpate these.
+table(xd$net) #Note: for IRS, 'net' really means 'trial arm'. I will try to update these.
 table(xd$hut)
 table(xd$sleeper)
 xd[xd$hut==1,]
@@ -258,6 +288,5 @@ ggplot(data_power) + geom_point(aes(x = mosquitoes, y = power)) + theme_classic(
   xlab('Mean no. of mosquitoes') + ylab('Study Power (%)') + ylim(c(0,100)) +
   geom_errorbar(aes(x = mosquitoes, ymin = ci1, ymax = ci2)) + 
   geom_hline(yintercept = 80, color = 'orange') # orange line indicates 80% power
-
 
 

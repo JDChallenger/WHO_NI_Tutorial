@@ -278,7 +278,7 @@ hypothesis_test <- function(trial,aoi,NIMpc = 7,NIMvar = 1,
     }else{
       NIMx <- NIM
     }
-    print(paste0('NIMx: ', NIMx))
+    #print(paste0('NIMx: ', NIMx))
     
     #relevel
     dataset$net <- relevel(dataset$net,aux[aoi[1]]) 
@@ -329,7 +329,7 @@ hypothesis_test <- function(trial,aoi,NIMpc = 7,NIMvar = 1,
     }else{
       NIMx <- NIM
     }
-    print(paste0('NIMx: ', NIMx))
+    #print(paste0('NIMx: ', NIMx))
     
     fit_n <-
       glm(
@@ -423,7 +423,7 @@ hypothesis_test <- function(trial,aoi,NIMpc = 7,NIMvar = 1,
     }else{
       NIMx <- NIM
     }
-    print(paste0('NIMx: ', NIMx))
+    #print(paste0('NIMx: ', NIMx))
     
     if(NIMx < 1){
       print('Check NIM: it should be >1 for blood-feeding inhibition')
@@ -442,7 +442,7 @@ hypothesis_test <- function(trial,aoi,NIMpc = 7,NIMvar = 1,
     labl <- paste0('net', aux[aoi[2]])
 
     if(exp(coef(summary(fit_n))[labl,'Estimate'] +
-           1.96*coef(summary(fit_n))[labl,'Std. Error']) < NIM){
+           1.96*coef(summary(fit_n))[labl,'Std. Error']) < NIMx){
       return(1)
     }else{
       return(0)
@@ -472,7 +472,7 @@ hypothesis_test <- function(trial,aoi,NIMpc = 7,NIMvar = 1,
     }else{
       NIMx <- NIM
     }
-    print(paste0('NIMx: ', NIMx))
+    #print(paste0('NIMx: ', NIMx))
     
     if(NIMx < 1){
       print('Check NIM: it should be >1 for blood-feeding inhibition')
@@ -494,7 +494,7 @@ hypothesis_test <- function(trial,aoi,NIMpc = 7,NIMvar = 1,
     labl <- 'ITNB'#paste0('net',aux[aoi[3]])
 
     if(exp(coef(summary(fit_n))[labl,'Estimate'] +
-           1.96*coef(summary(fit_n))[labl,'Std. Error']) < NIM){
+           1.96*coef(summary(fit_n))[labl,'Std. Error']) < NIMx){
       return(1)
     }else{
       return(0)

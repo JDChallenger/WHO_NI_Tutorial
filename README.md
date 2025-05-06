@@ -12,4 +12,4 @@ Before power can be calculated, the design of the EHT must be specified. As outl
 This repository has been updated, to also include a tutorial on assessing field-aged nets, collected during community studies. All the materials pertaining to community studies (R code and the PDF version of the tutorial) can be found in the folder 'Community_Studies'. A hyperlink to the relevant WHO documentation will appear here when it is available
 
 ## Update (May 2025): Regeneration Studies for ITNs
-This repository has been updated to include guidance on estimating the regeneration time for ITNs, after washing.
+This repository has been updated to include guidance on estimating the regeneration time for ITNs, after washing. The relevant R code can be found in the folder 'Regeneration Time'. Here, we include code for analysing data collected from a bioassay (measuring mosquito mortality) and from a chemical analysis.

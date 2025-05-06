@@ -7,7 +7,6 @@ library(emmeans)
 # to practise with. You can replace these with your own data, but ensure that the 
 # variable names are consistent with the simulated datasets.
 
-#days <- c(1,2,3,5,7,10,15,20,30,40) #do we need day0? # remove?
 dat1 <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_chem.xlsx', sheet = 'sim1')
 str(dat1)
 
@@ -16,6 +15,7 @@ str(dat1)
 dat1$day <- as.numeric(dat1$day) # numeric 'day'
 dat1$day_f <- as.factor(dat1$day) # factor variable for 'day'
 
+#what study days do we have?
 days <- unique(dat1$day)
 
 #function to obtain (unadjusted) average concentration measured on each day in the dataset

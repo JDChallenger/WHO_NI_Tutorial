@@ -20,7 +20,7 @@ dx$day_f <- as.factor(dx$day) # factor variable for 'day'
 table(dx$day)
 days <- unique(dx$day)
 
-#This function calculates the raw (unadjusted mortality estimates) from the dataset
+#This function calculates the raw (unadjusted) mortality estimates from the dataset
 average_mortality_ci <- function(data = df, days_v = days){
   av_mort <- rep(0,length(days_v))
   av_mort_c1 <- rep(0,length(days_v))

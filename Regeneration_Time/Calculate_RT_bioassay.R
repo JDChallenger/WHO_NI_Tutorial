@@ -87,7 +87,7 @@ for(j in 1:ld){
 # Plot: model-adjusted mortality; unadjusted mortality; and identify the RT via our method
 # Open black circles: unadjusted mortality estimates (error bars are the 95% CIs)
 # Closed purple circles: model-adjusted mortality estimates
-# Solid pink horizontal line: model adjusted estimate of mortality at the time point we establish as the R.T.
+# Solid pink horizontal line: model-adjusted estimate of mortality at the time point we establish as the R.T.
 # Dashed pink horizontal line: mortality 5% higher than the established R.T.
 # The purple box indicates the estimated R.T. 
 ggplot() + geom_hline(yintercept = 

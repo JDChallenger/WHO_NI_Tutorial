@@ -59,6 +59,7 @@ pred2 <- as.data.frame(pred)
 #Add a numeric variable for day to this data frame (careful converting from a factor!)
 pred2$day <- as.numeric(as.character(pred2$day_f))
 
+# extract a vector of the model predictions
 xv2 <- pred2$prob
 ld <- length(xv2) - 1
 
@@ -77,7 +78,7 @@ for(j in 1:ld){
     break # finish the for loop when the RT has been identified
   }
   if(j==ld & count==0){
-    print('Routine has identified the regeneration time as being the final measured value. Inspect data, to check this makes sense')
+    print('Routine has identified the regeneration time as being the final measured value. Inspect data & model predictions, to check this makes sense')
     rt <- days[j+1]
     print(paste0('Regeneration time is: ',rt))
     rtG3 <- j + 1 #i.e. the last value

@@ -7,7 +7,7 @@ library(emmeans)
 # to practise with. You can replace these with your own data, but ensure that the 
 # variable names are consistent with the simulated datasets.
 
-dat1 <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_chem.xlsx', sheet = 'sim1')
+dat1 <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_chem2.xlsx', sheet = 'sim1')
 str(dat1)
 
 #For plotting, it is more useful to have 'day' as a numeric variable
@@ -34,6 +34,7 @@ ggplot(mc) + geom_point(aes(x = day, y = av_ch)) + theme_classic() +
   ylab('Surface concentration [g/kg]') + xlab('Day')
 
 #Now fit linear model to data, with fixed-effects for day (as a factor variable) & batch
+# plus a fixed effect for the unwashed net piece
 fitC <- lm(conc ~ day_f + batch, data = dat1)
 summary(fitC)
 rc <- emmeans(fitC, "day_f")

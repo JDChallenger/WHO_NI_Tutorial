@@ -34,8 +34,8 @@ ggplot(mc) + geom_point(aes(x = day, y = av_ch)) + theme_classic() +
   ylab('Surface concentration [g/kg]') + xlab('Day')
 
 #Now fit linear model to data, with fixed-effects for day (as a factor variable) & batch
-# plus a fixed effect for the unwashed net piece
-fitC <- lm(conc ~ day_f + batch, data = dat1)
+#We also include a (continuous) fixed effect for the concentration of the unwashed half of the net piece
+fitC <- lm(conc ~ day_f + batch + conc_unwashed, data = dat1)
 summary(fitC)
 rc <- emmeans(fitC, "day_f")
 pred_c <- as.data.frame(rc)

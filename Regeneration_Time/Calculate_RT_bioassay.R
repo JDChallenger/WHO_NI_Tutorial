@@ -11,7 +11,7 @@ library(emmeans)
 
 # In the Excel sheet, the datasets are saved in separate sheets ('sim1', 'sim2', 'sim3', etc.)
 
-dx <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_bioassay.xlsx', sheet = 'sim1')
+dx <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_bioassay.xlsx', sheet = 'sim2')
 head(dx)
 #For plotting, it is more useful to have 'day' as a numeric variable
 # For the GLM, it needs to be a factor variable. So we make a 2nd version

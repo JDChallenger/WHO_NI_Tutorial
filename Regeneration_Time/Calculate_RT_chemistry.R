@@ -7,7 +7,7 @@ library(emmeans)
 # to practise with. You can replace these with your own data, but ensure that the 
 # variable names are consistent with the simulated datasets.
 
-dat1 <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_chem2.xlsx', sheet = 'sim1')
+dat1 <-  readxl::read_xlsx('Regeneration_Time/twelve_datasets_chem3.xlsx', sheet = 'sim1')
 str(dat1)
 
 #For plotting, it is more useful to have 'day' as a numeric variable

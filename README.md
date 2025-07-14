@@ -13,3 +13,5 @@ This repository has been updated, to also include a tutorial on assessing field-
 
 ## Update (May 2025): Regeneration Studies for ITNs
 This repository has been updated to include guidance on estimating the regeneration time for ITNs, after washing. The relevant R code can be found in the folder 'Regeneration_Time'. Here, we include code for analysing data collected from a bioassay (measuring mosquito mortality) and from a chemical analysis. The Excel sheets in this folder contain some simulated datasets, to allow users to practise carrying out the procedure, before applying it to their own dataset(s). Please note: these simulated datasets were updated in July 2025, to provide greater realism.
+
+The relevant WHO documentation for these studies can be found [here](https://extranet.who.int/prequal/node/29912).

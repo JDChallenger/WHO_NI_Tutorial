@@ -104,7 +104,7 @@ table(xc[xc$net=='E2',]$sleeper)
 table(xc[xc$hut==2,]$sleeper)
 
 #Check how many days this trial took (note: doesn't include rest days)
-max(xc$day) 
+table(xc$day) 
 
 #Note: there is also a variable called 'night' in the dataset- this just 
 #denotes the day in a given round i.e. it takes a value between 1 and 'npr'
